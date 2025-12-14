@@ -3,64 +3,118 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Safety & Tech Share Wheel — Working Version</title>
+<title>Safety & Tech Share Wheel — Final One-Page Edition</title>
 
 <style>
+/* GLOBAL */
 body {
-    font-family: Arial, sans-serif;
+    margin: 0;
     background: #111;
     color: white;
-    text-align: center;
-    margin: 0;
-    padding: 20px;
+    font-family: Arial, sans-serif;
+    height: 100vh;
+    overflow: hidden;
+    display: grid;
+    grid-template-columns: 250px 1fr 250px;
+    grid-template-rows: auto 1fr;
+    grid-template-areas:
+        "header header header"
+        "left wheel right";
 }
 
-h1 { margin-bottom: 10px; }
+/* HEADER */
+#header {
+    grid-area: header;
+    text-align: center;
+    padding: 10px;
+}
 
-/* Winner Banner */
+#header h1 {
+    margin: 5px 0;
+}
+
 #winnerBanner {
-    font-size: 26px;
-    margin: 15px;
-    padding: 15px;
+    font-size: 24px;
+    margin: 10px auto;
+    padding: 12px;
     background: #333;
     border-radius: 10px;
+    width: 60%;
     transition: transform 0.3s ease;
 }
 
-/* Buttons */
+/* LEFT PANEL */
+#leftPanel, #rightPanel {
+    background: #1a1a1a;
+    padding: 15px;
+    overflow-y: auto;
+}
+
+#leftPanel {
+    grid-area: left;
+    border-right: 2px solid #333;
+}
+
+#rightPanel {
+    grid-area: right;
+    border-left: 2px solid #333;
+}
+
+.panelTitle {
+    font-size: 20px;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+.listItem {
+    padding: 6px 10px;
+    background: #222;
+    margin-bottom: 6px;
+    border-radius: 6px;
+}
+
+/* WHEEL AREA */
+#wheelArea {
+    grid-area: wheel;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.controls {
+    margin-top: 10px;
+}
+
 button {
     padding: 12px 20px;
-    margin: 10px;
     background: #007bff;
     border: none;
-    border-radius: 6px;
     color: white;
+    border-radius: 6px;
+    margin: 5px;
     cursor: pointer;
     font-size: 16px;
 }
-button:hover { background: #0056b3; }
-.reset-btn { background: #ff4444 !important; }
+button:hover {
+    background: #0056b3;
+}
+.reset-btn { background: #ff4444; }
 
-/* Pointer */
 #pointer {
     width: 0;
     height: 0;
-    border-left: 20px solid transparent;
-    border-right: 20px solid transparent;
-    border-bottom: 30px solid red;
+    border-left: 25px solid transparent;
+    border-right: 25px solid transparent;
+    border-bottom: 40px solid red;
     margin: 10px auto;
 }
 
-/* Wheel */
 #wheel {
-    width: 350px;
-    height: 350px;
+    width: 400px;
+    height: 400px;
     border-radius: 50%;
     border: 6px solid #444;
-    margin: 20px auto;
-    position: relative;
-    overflow: hidden;
-    transition: transform 5s cubic-bezier(.17,.67,.12,1.02);
     background: conic-gradient(
         #00eaff 0deg 30deg, #ff4da6 30deg 60deg,
         #00eaff 60deg 90deg, #ff4da6 90deg 120deg,
@@ -69,13 +123,16 @@ button:hover { background: #0056b3; }
         #00eaff 240deg 270deg, #ff4da6 270deg 300deg,
         #00eaff 300deg 330deg, #ff4da6 330deg 360deg
     );
+    position: relative;
+    overflow: hidden;
+    transition: transform 5s cubic-bezier(.17,.67,.12,1.02);
 }
 
 .sliceLabel {
     position: absolute;
     left: 50%;
     top: 50%;
-    width: 40%;
+    width: 45%;
     transform-origin: 0% 50%;
     color: white;
     font-size: 18px;
@@ -84,27 +141,18 @@ button:hover { background: #0056b3; }
     text-align: right;
 }
 
-/* Panels */
-.panel {
-    width: 300px;
-    margin: 20px auto;
-    padding: 15px;
-    background: #222;
-    border-radius: 10px;
-}
-.listItem { padding: 6px; }
-
-/* Confetti */
+/* CONFETTI */
 .confetti {
     position: fixed;
     width: 12px;
     height: 12px;
     top: -10px;
     opacity: 0.9;
-    animation: fallConfetti 2.5s linear forwards;
+    animation: confettiFall 2.5s linear forwards;
     z-index: 9999;
 }
-@keyframes fallConfetti {
+
+@keyframes confettiFall {
     to { transform: translateY(110vh) rotate(720deg); }
 }
 </style>
@@ -112,30 +160,38 @@ button:hover { background: #0056b3; }
 
 <body>
 
-<h1>Safety & Tech Share Wheel</h1>
+<!-- HEADER -->
+<div id="header">
+    <h1>Safety & Tech Share Wheel</h1>
+    <div id="winnerBanner">Spin the wheel!</div>
+    <div class="controls">
+        <button onclick="spin('safety')">Spin Safety</button>
+        <button onclick="spin('tech')">Spin Tech</button>
+        <button class="reset-btn" onclick="resetAll()">Reset</button>
+    </div>
+</div>
 
-<div id="winnerBanner">Spin the wheel!</div>
-
-<button onclick="spin('safety')">Spin Safety</button>
-<button onclick="spin('tech')">Spin Tech</button>
-<button class="reset-btn" onclick="resetAll()">Reset</button>
-
-<div id="pointer"></div>
-<div id="wheel"></div>
-
-<div class="panel">
-    <h3>Remaining People</h3>
+<!-- LEFT PANEL -->
+<div id="leftPanel">
+    <div class="panelTitle">Remaining</div>
     <div id="remainingList"></div>
 </div>
 
-<div class="panel">
-    <h3>Selected</h3>
+<!-- CENTER WHEEL -->
+<div id="wheelArea">
+    <div id="pointer"></div>
+    <div id="wheel"></div>
+</div>
+
+<!-- RIGHT PANEL -->
+<div id="rightPanel">
+    <div class="panelTitle">Selected</div>
     <div id="chosenList"></div>
 </div>
 
 <script>
 
-/* ------------------ DATA ------------------ */
+/* ------------ DATA ---------------- */
 const defaultRoster = [
   "Ali Santiago","Anna Hutchinson","Austin Bartoszek","Brian Kloppe",
   "Casey Williams","Carter Nelson","Christian A. Johnston","Christie Walters",
@@ -163,14 +219,14 @@ function save() {
     localStorage.setItem("chosenHistory", JSON.stringify(chosenHistory));
 }
 
-/* ------------------ INITIALS ------------------ */
+/* ------------- INITIALS ---------- */
 const initials = name => name.split(" ").map(w => w[0]).join("").toUpperCase();
 
-/* ------------------ WHEEL BUILD ------------------ */
+/* ------------ WHEEL BUILD ------------ */
 function buildWheel(pool) {
     const wheel = document.getElementById("wheel");
-    wheel.innerHTML = "";
     const angle = 360 / pool.length;
+    wheel.innerHTML = "";
 
     for (let i = 0; i < pool.length; i++) {
         const div = document.createElement("div");
@@ -181,7 +237,7 @@ function buildWheel(pool) {
     }
 }
 
-/* ------------------ CONFETTI ------------------ */
+/* ------------ CONFETTI ------------ */
 function launchConfetti() {
     for (let i = 0; i < 50; i++) {
         const c = document.createElement("div");
@@ -189,13 +245,14 @@ function launchConfetti() {
         c.style.left = Math.random() * 100 + "vw";
         c.style.background = ["#ff4da6","#00eaff","#8a2eff","#ffdd00"]
             [Math.floor(Math.random()*4)];
-        c.style.animationDuration = (1.5 + Math.random() * 1.5) + "s";
+        c.style.animationDuration =
+            (1.5 + Math.random() * 1.5) + "s";
         document.body.appendChild(c);
         setTimeout(() => c.remove(), 3000);
     }
 }
 
-/* ------------------ SPIN ------------------ */
+/* ------------ SPIN (WORKING) ------------ */
 let spinning = false;
 
 function spin(type) {
@@ -203,7 +260,8 @@ function spin(type) {
     spinning = true;
 
     let pool = type === "safety" ? safetyPool : techPool;
-    if (pool.length === 0) pool = type === "safety" ? (safetyPool=[...names]) : (techPool=[...names]);
+    if (pool.length === 0)
+        pool = type === "safety" ? (safetyPool = [...names]) : (techPool = [...names]);
 
     buildWheel(pool);
 
@@ -212,7 +270,6 @@ function spin(type) {
     const index = Math.floor(Math.random() * pool.length);
     const winner = pool[index];
 
-    // Reset -> force reflow -> spin
     wheel.style.transition = "none";
     wheel.style.transform = "rotate(0deg)";
     wheel.offsetHeight;
@@ -227,10 +284,9 @@ function spin(type) {
         chosenHistory.unshift(winner);
         save();
 
-        // Winner Banner Animation
         const banner = document.getElementById("winnerBanner");
-        banner.innerHTML = `🎉🏆 Congratulations, <strong>${winner}</strong>! 🏆🎉`;
-        banner.style.transform = "scale(1.15)";
+        banner.innerHTML = `🎉🏆 Congratulations, <strong>${winner}</strong>!`;
+        banner.style.transform = "scale(1.2)";
         setTimeout(() => banner.style.transform = "scale(1)", 300);
 
         launchConfetti();
@@ -239,7 +295,7 @@ function spin(type) {
     }, 5100);
 }
 
-/* ------------------ UPDATE LISTS ------------------ */
+/* ------------ LIST UPDATE ------------ */
 function updateLists() {
     document.getElementById("remainingList").innerHTML =
         names.map(n => `<div class='listItem'>${n}</div>`).join("");
@@ -248,7 +304,7 @@ function updateLists() {
         chosenHistory.map(n => `<div class='listItem'>✔ ${n}</div>`).join("");
 }
 
-/* ------------------ RESET ------------------ */
+/* ------------ RESET ------------ */
 function resetAll() {
     if (!confirm("Reset ALL progress?")) return;
 
@@ -258,13 +314,12 @@ function resetAll() {
     techPool = [...defaultRoster];
     chosenHistory = [];
     save();
-
-    buildWheel(names);
     updateLists();
+    buildWheel(names);
     document.getElementById("winnerBanner").textContent = "Progress Reset.";
 }
 
-/* ------------------ INIT ------------------ */
+/* ------------ INIT ------------ */
 buildWheel(names);
 updateLists();
 
