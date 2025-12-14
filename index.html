@@ -66,7 +66,6 @@ body {
   transform: scale(1.05);
 }
 
-/* Reset button */
 .reset-btn {
   background: #ff3333 !important;
 }
@@ -96,7 +95,6 @@ body {
   width: 420px;
   height: 420px;
   border-radius: 50%;
-  background: #111;
   border: 6px solid rgba(255,255,255,0.15);
   overflow: hidden;
   position: relative;
@@ -104,6 +102,7 @@ body {
   box-shadow: 0 0 25px rgba(0,0,0,0.5);
 }
 
+/* Labels inside slices */
 .sliceLabel {
   position: absolute;
   left: 50%;
@@ -115,13 +114,6 @@ body {
   color: white;
   font-size: 16px;
   font-weight: bold;
-}
-
-/* Highlight selected slice */
-.highlight {
-  color: yellow;
-  font-size: 20px !important;
-  text-shadow: 0 0 10px yellow;
 }
 
 /* ---------- SIDE PANELS ---------- */
@@ -175,14 +167,13 @@ body {
   <div id="wheel"></div>
 </div>
 
-<!-- SIDE PANELS -->
 <div class="sidePanelContainer">
-  <div class="panel" id="remainingPanel">
+  <div class="panel">
     <h3>Remaining</h3>
     <div id="remainingList"></div>
   </div>
 
-  <div class="panel" id="chosenPanel">
+  <div class="panel">
     <h3>Selected</h3>
     <div id="chosenList"></div>
   </div>
@@ -202,8 +193,8 @@ const defaultRoster = [
 ];
 
 let names = JSON.parse(localStorage.getItem("names")) || [...defaultRoster];
-let safetyPool = JSON.parse(localStorage.getItem("safetyPool")) || [...defaultRoster];
-let techPool = JSON.parse(localStorage.getItem("techPool")) || [...defaultRoster];
+let safetyPool = JSON.parse(localStorage.getItem("safetyPool")) || [...names];
+let techPool = JSON.parse(localStorage.getItem("techPool")) || [...names];
 let chosenHistory = JSON.parse(localStorage.getItem("chosenHistory")) || [];
 
 function save() {
@@ -213,16 +204,30 @@ function save() {
   localStorage.setItem("chosenHistory", JSON.stringify(chosenHistory));
 }
 
-/* ----------- WHEEL RENDER ---------- */
+/* ----------- INITIALS ----------- */
 function getInitials(name) {
   return name.split(" ").map(w => w[0]).join("").toUpperCase();
 }
 
+/* ----------- BUILD REAL SLICES ----------- */
 function buildWheel(list) {
   const wheel = document.getElementById("wheel");
   wheel.innerHTML = "";
+
   const sliceAngle = 360 / list.length;
 
+  // build alternating-color conic gradient pattern
+  let gradientParts = [];
+  for (let i = 0; i < list.length; i++) {
+    const start = i * sliceAngle;
+    const end = start + sliceAngle;
+    const color = i % 2 === 0 ? "var(--accent)" : "var(--accent2)";
+    gradientParts.push(`${color} ${start}deg ${end}deg`);
+  }
+
+  wheel.style.background = `conic-gradient(${gradientParts.join(",")})`;
+
+  // labels
   list.forEach((name, i) => {
     const label = document.createElement("div");
     label.className = "sliceLabel";
@@ -250,32 +255,31 @@ function startSpin(type) {
   const index = Math.floor(Math.random() * pool.length);
   const winner = pool[index];
 
-  const endRotation = 360 * 15 + (360 - (index * sliceAngle + sliceAngle / 2));
+  const endRotation = 360 * 12 + (360 - (index * sliceAngle + sliceAngle / 2));
   wheel.style.transform = `rotate(${endRotation}deg)`;
 
   setTimeout(() => {
     spinning = false;
-
     pool.splice(index, 1);
     chosenHistory.unshift(winner);
     save();
-
     document.getElementById("winnerBanner").innerHTML = `🏆 Congratulations, ${winner}!`;
     updateLists();
   }, 6000);
 }
 
-/* ----------- LIST RENDERING ----------- */
+/* ----------- UPDATE LISTS ----------- */
 function updateLists() {
   document.getElementById("remainingList").innerHTML =
-    names.map(n => `<div class="listItem">${n}</div>`).join("");
+    names.map(n => `<div class='listItem'>${n}</div>`).join("");
+
   document.getElementById("chosenList").innerHTML =
-    chosenHistory.map(n => `<div class="listItem">✔ ${n}</div>`).join("");
+    chosenHistory.map(n => `<div class='listItem'>✔ ${n}</div>`).join("");
 }
 
-/* ----------- RESET LOGIC ----------- */
+/* ----------- RESET ----------- */
 function confirmReset() {
-  if (!confirm("Are you sure you want to reset ALL progress?")) return;
+  if (!confirm("Reset ALL progress?")) return;
 
   localStorage.clear();
   names = [...defaultRoster];
@@ -285,7 +289,7 @@ function confirmReset() {
   save();
   updateLists();
   buildWheel(names);
-  document.getElementById("winnerBanner").innerHTML = "Progress Reset.";
+  document.getElementById("winnerBanner").textContent = "Progress Reset.";
 }
 
 /* ----------- INIT ----------- */
