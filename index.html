@@ -26,6 +26,11 @@
     .btn:hover { background: #0059c9; }
     #result { margin-top: 30px; font-size: 24px; font-weight: bold; }
     #list { margin-top: 30px; font-size: 18px; }
+    #nameInput {
+      padding: 10px; 
+      font-size: 16px;
+      width: 300px;
+    }
   </style>
 </head>
 
@@ -33,11 +38,11 @@
 
   <h1>Safety Moment & Tech Share Picker</h1>
 
-  <p>Enter your team's names (comma-separated):</p>
+  <p>Add a name or multiple names (comma-separated):</p>
 
-  <textarea id="nameInput" rows="4" cols="50" placeholder="Alice, Bob, Charlie"></textarea>
+  <input id="nameInput" placeholder="Enter name(s)">
   <br><br>
-  <button class="btn" onclick="saveNames()">Save Names</button>
+  <button class="btn" onclick="addNames()">Add Name(s)</button>
 
   <hr>
 
@@ -53,34 +58,52 @@
     let remainingSafety = JSON.parse(localStorage.getItem("remainingSafety")) || [...names];
     let remainingTech = JSON.parse(localStorage.getItem("remainingTech")) || [...names];
 
-    function saveNames() {
-      const text = document.getElementById("nameInput").value;
-      names = text.split(",").map(n => n.trim()).filter(n => n.length > 0);
+    function addNames() {
+      const input = document.getElementById("nameInput").value;
+      if (!input.trim()) {
+        alert("Enter a name first.");
+        return;
+      }
 
+      const newNames = input
+        .split(",")
+        .map(n => n.trim())
+        .filter(n => n.length > 0);
+
+      // Add to master list (avoids duplicates)
+      newNames.forEach(name => {
+        if (!names.includes(name)) {
+          names.push(name);
+          remainingSafety.push(name);
+          remainingTech.push(name);
+        }
+      });
+
+      // Save changes
       localStorage.setItem("names", JSON.stringify(names));
-      remainingSafety = [...names];
-      remainingTech = [...names];
-
       localStorage.setItem("remainingSafety", JSON.stringify(remainingSafety));
       localStorage.setItem("remainingTech", JSON.stringify(remainingTech));
 
+      document.getElementById("nameInput").value = "";
       showList();
-      alert("Names saved!");
+      alert("Added!");
     }
 
     function pick(type) {
       let remaining = type === "safety" ? remainingSafety : remainingTech;
+
       if (remaining.length === 0) {
         alert("Everyone has gone! Resetting list.");
         if (type === "safety") remainingSafety = [...names];
         else remainingTech = [...names];
+
         remaining = type === "safety" ? remainingSafety : remainingTech;
       }
 
       const index = Math.floor(Math.random() * remaining.length);
       const selected = remaining[index];
 
-      // Remove from the list
+      // Remove selected
       remaining.splice(index, 1);
 
       // Save back
@@ -97,9 +120,10 @@
 
     function showList() {
       document.getElementById("list").innerHTML = `
-        <h3>Remaining</h3>
-        <strong>Safety:</strong> ${remainingSafety.join(", ")} <br><br>
-        <strong>Tech:</strong> ${remainingTech.join(", ")}
+        <h3>Current Team</h3>
+        <strong>All Names:</strong> ${names.join(", ")} <br><br>
+        <strong>Remaining Safety:</strong> ${remainingSafety.join(", ")} <br><br>
+        <strong>Remaining Tech:</strong> ${remainingTech.join(", ")}
       `;
     }
 
@@ -108,3 +132,4 @@
 
 </body>
 </html>
+
