@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Safety & Tech Share Wheel — Pointer Aligned</title>
+<title>Safety & Tech Share Wheel — Clean No-Arrow Edition</title>
 
 <style>
 body {
@@ -38,7 +38,7 @@ body {
     transition: transform .3s ease;
 }
 
-/* PANELS */
+/* LEFT / RIGHT PANELS */
 #leftPanel, #rightPanel {
     background: #1a1a1a;
     padding: 10px;
@@ -66,25 +66,6 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    position: relative;
-}
-
-#wheelWrapper {
-    position: relative;
-}
-
-/* RIGHT SIDE POINTER */
-#pointer {
-    position: absolute;
-    right: -20px;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 0;
-    height: 0;
-    border-top: 20px solid transparent;
-    border-bottom: 20px solid transparent;
-    border-left: 35px solid red;
-    z-index: 10;
 }
 
 #wheel {
@@ -126,6 +107,7 @@ button {
     border: none;
     color: white;
     cursor: pointer;
+    font-size: 16px;
 }
 button:hover { background: #0056b3; }
 .reset-btn { background: #ff4444; }
@@ -163,12 +145,9 @@ button:hover { background: #0056b3; }
     <div id="remainingList"></div>
 </div>
 
-<!-- WHEEL AREA -->
+<!-- WHEEL -->
 <div id="wheelArea">
-    <div id="wheelWrapper">
-        <div id="pointer"></div>
-        <div id="wheel"></div>
-    </div>
+    <div id="wheel"></div>
 </div>
 
 <!-- RIGHT PANEL -->
@@ -179,7 +158,7 @@ button:hover { background: #0056b3; }
 
 <script>
 
-/* ------------ DATA ------------ */
+/* ------------------ DATA ------------------ */
 const defaultRoster = [
   "Ali Santiago","Anna Hutchinson","Austin Bartoszek","Brian Kloppe",
   "Casey Williams","Carter Nelson","Christian A. Johnston","Christie Walters",
@@ -191,8 +170,8 @@ const defaultRoster = [
 ];
 
 function load(key, fallback) {
-    let x = JSON.parse(localStorage.getItem(key));
-    return Array.isArray(x) && x.length ? x : [...fallback];
+    let d = JSON.parse(localStorage.getItem(key));
+    return Array.isArray(d) && d.length ? d : [...fallback];
 }
 
 let names = load("names", defaultRoster);
@@ -207,25 +186,25 @@ function save() {
     localStorage.setItem("chosenHistory", JSON.stringify(chosenHistory));
 }
 
-/* ------------ INITIALS ------------ */
+/* ------------------ INITIALS ------------------ */
 const initials = name => name.split(" ").map(w => w[0]).join("").toUpperCase();
 
-/* ------------ WHEEL BUILD ------------ */
+/* ------------------ BUILD WHEEL ------------------ */
 function buildWheel(pool) {
     const wheel = document.getElementById("wheel");
     wheel.innerHTML = "";
     const angle = 360 / pool.length;
 
     for (let i = 0; i < pool.length; i++) {
-        const d = document.createElement("div");
-        d.className = "sliceLabel";
-        d.textContent = initials(pool[i]);
-        d.style.transform = `rotate(${angle * i}deg) translate(0, -50%)`;
-        wheel.appendChild(d);
+        const label = document.createElement("div");
+        label.className = "sliceLabel";
+        label.textContent = initials(pool[i]);
+        label.style.transform = `rotate(${i * angle}deg) translate(0,-50%)`;
+        wheel.appendChild(label);
     }
 }
 
-/* ------------ CONFETTI ------------ */
+/* ------------------ CONFETTI ------------------ */
 function confetti() {
     for (let i = 0; i < 40; i++) {
         const c = document.createElement("div");
@@ -238,18 +217,16 @@ function confetti() {
     }
 }
 
-/* ------------ SPIN (RIGHT-ALIGNED POINTER FIX) ------------ */
+/* ------------------ SPIN (NO POINTER VERSION) ------------------ */
 let spinning = false;
 
 function spin(type) {
     if (spinning) return;
     spinning = true;
 
-    let pool = (type === "safety") ? safetyPool : techPool;
-
-    if (pool.length === 0) {
+    let pool = type === "safety" ? safetyPool : techPool;
+    if (pool.length === 0)
         pool = type === "safety" ? (safetyPool = [...names]) : (techPool = [...names]);
-    }
 
     buildWheel(pool);
 
@@ -258,21 +235,22 @@ function spin(type) {
     const index = Math.floor(Math.random() * pool.length);
     const winner = pool[index];
 
-    /* RESET */
+    // Reset rotation
     wheel.style.transition = "none";
     wheel.style.transform = "rotate(0deg)";
     wheel.offsetHeight;
 
     /* 
-       RIGHT-SIDE POINTER ALIGNMENT FIX:
-       Pointer is at 90°, so we subtract 90° from the slice center 
-       to align perfectly on the pointer.
+      ALIGNMENT FIX:
+      We want the winner's slice to end facing RIGHT (0 degrees visually).
+      That means the wheel must rotate the negative of that slice's center.
     */
-    let landingAngle = (index * sliceAngle + sliceAngle / 2) - 90;
+    let landingAngle = -(index * sliceAngle + sliceAngle/2);
 
-    // normalize 
+    // Normalize and add spins
     landingAngle = ((landingAngle % 360) + 360) + 360 * 10;
 
+    // Spin
     wheel.style.transition = "transform 5s cubic-bezier(.17,.67,.12,1.02)";
     wheel.style.transform = `rotate(${landingAngle}deg)`;
 
@@ -290,10 +268,10 @@ function spin(type) {
 
         confetti();
         updateLists();
-    }, 5100);
+    }, 5050);
 }
 
-/* ------------ UPDATE LISTS ------------ */
+/* ------------------ UPDATE LISTS ------------------ */
 function updateLists() {
     document.getElementById("remainingList").innerHTML =
         names.map(n=>`<div class='listItem'>${n}</div>`).join("");
@@ -302,9 +280,9 @@ function updateLists() {
         chosenHistory.map(n=>`<div class='listItem'>✔ ${n}</div>`).join("");
 }
 
-/* ------------ RESET ------------ */
+/* ------------------ RESET ------------------ */
 function resetAll() {
-    if (!confirm("Reset ALL progress?")) return;
+    if (!confirm("Reset all progress?")) return;
     localStorage.clear();
     names=[...defaultRoster];
     safetyPool=[...defaultRoster];
@@ -316,10 +294,11 @@ function resetAll() {
     document.getElementById("winnerBanner").textContent="Progress Reset.";
 }
 
-/* ------------ INIT ------------ */
+/* ------------------ INIT ------------------ */
 buildWheel(names);
 updateLists();
 
 </script>
 </body>
 </html>
+
