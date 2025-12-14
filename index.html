@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Safety Moment & Tech Share Picker</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Safety & Tech Share Wheel</title>
 
   <style>
     body {
@@ -12,7 +12,9 @@
       padding: 40px;
       text-align: center;
     }
+
     h1 { margin-bottom: 10px; }
+
     .btn {
       margin: 10px;
       padding: 15px 25px;
@@ -24,10 +26,55 @@
       border-radius: 6px;
     }
     .btn:hover { background: #0059c9; }
-    #result { margin-top: 30px; font-size: 24px; font-weight: bold; }
-    #list { margin-top: 30px; font-size: 18px; }
+
+    #wheel {
+      margin: 40px auto;
+      width: 300px;
+      height: 300px;
+      border: 10px solid #333;
+      border-radius: 50%;
+      position: relative;
+      overflow: hidden;
+      transform: rotate(0deg);
+      transition: transform 6s cubic-bezier(.17,.67,.12,1.02);
+    }
+
+    .slice {
+      position: absolute;
+      width: 50%;
+      height: 50%;
+      top: 50%;
+      left: 50%;
+      transform-origin: 0% 0%;
+      background: #ccc;
+      border: 1px solid #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      text-align: center;
+    }
+
+    #pointer {
+      width: 0;
+      height: 0;
+      border-left: 20px solid transparent;
+      border-right: 20px solid transparent;
+      border-bottom: 30px solid red;
+      margin: 0 auto;
+      margin-bottom: -20px;
+    }
+
+    #result {
+      margin-top: 30px;
+      font-size: 26px;
+      font-weight: bold;
+    }
+
+    #list { margin-top: 30px; font-size: 16px; }
+
     #nameInput {
-      padding: 10px; 
+      padding: 10px;
       font-size: 16px;
       width: 300px;
     }
@@ -36,9 +83,9 @@
 
 <body>
 
-  <h1>Safety Moment & Tech Share Picker</h1>
+  <h1>Safety Moment & Tech Share Wheel</h1>
 
-  <p>Add a name or multiple names (comma-separated):</p>
+  <p>Add new names (comma-separated):</p>
 
   <input id="nameInput" placeholder="Enter name(s)">
   <br><br>
@@ -46,17 +93,67 @@
 
   <hr>
 
-  <button class="btn" onclick="pick('safety')">Pick Safety Moment</button>
-  <button class="btn" onclick="pick('tech')">Pick Tech Share</button>
+  <button class="btn" onclick="startSpin('safety')">Spin for Safety Moment</button>
+  <button class="btn" onclick="startSpin('tech')">Spin for Tech Share</button>
+
+  <div id="pointer"></div>
+  <div id="wheel"></div>
 
   <div id="result"></div>
   <div id="list"></div>
 
   <script>
-    // Load saved data
-    let names = JSON.parse(localStorage.getItem("names")) || [];
-    let remainingSafety = JSON.parse(localStorage.getItem("remainingSafety")) || [...names];
-    let remainingTech = JSON.parse(localStorage.getItem("remainingTech")) || [...names];
+    // Default roster — loaded only if no saved roster exists
+    const defaultRoster = [
+      "Ali Santiago",
+      "Anna Hutchinson",
+      "Austin Bartoszek",
+      "Brian Kloppe",
+      "Casey Williams",
+      "Carter Nelson",
+      "Christian A. Johnston",
+      "Christie Walters",
+      "Daniel Taggart",
+      "Emiliano Garcia",
+      "Frank Bottiglieri",
+      "Grace Frigaard",
+      "Greg Waters",
+      "Ian Manhoo",
+      "Jim Pesek",
+      "Julissa Vergara",
+      "Kevin Ferm",
+      "Kyle Young",
+      "Lindsey Stewart",
+      "Mark Besser",
+      "Patrick McCarron",
+      "Rey Rodriguez",
+      "Richard Fredette",
+      "Shaun Thomas",
+      "Shane Bowen",
+      "Stacie Gray",
+      "Steve Lauer",
+      "Timothy Costello"
+    ];
+
+    // Load saved data or initialize with default
+    let names = JSON.parse(localStorage.getItem("names"));
+    let remainingSafety = JSON.parse(localStorage.getItem("remainingSafety"));
+    let remainingTech = JSON.parse(localStorage.getItem("remainingTech"));
+
+    if (!names) {
+      names = [...defaultRoster];
+      remainingSafety = [...defaultRoster];
+      remainingTech = [...defaultRoster];
+      save();
+    }
+
+    let spinning = false;
+
+    function save() {
+      localStorage.setItem("names", JSON.stringify(names));
+      localStorage.setItem("remainingSafety", JSON.stringify(remainingSafety));
+      localStorage.setItem("remainingTech", JSON.stringify(remainingTech));
+    }
 
     function addNames() {
       const input = document.getElementById("nameInput").value;
@@ -65,12 +162,8 @@
         return;
       }
 
-      const newNames = input
-        .split(",")
-        .map(n => n.trim())
-        .filter(n => n.length > 0);
+      const newNames = input.split(",").map(n => n.trim()).filter(n => n.length > 0);
 
-      // Add to master list (avoids duplicates)
       newNames.forEach(name => {
         if (!names.includes(name)) {
           names.push(name);
@@ -79,57 +172,85 @@
         }
       });
 
-      // Save changes
-      localStorage.setItem("names", JSON.stringify(names));
-      localStorage.setItem("remainingSafety", JSON.stringify(remainingSafety));
-      localStorage.setItem("remainingTech", JSON.stringify(remainingTech));
-
+      save();
       document.getElementById("nameInput").value = "";
       showList();
+      buildWheel();
       alert("Added!");
     }
 
-    function pick(type) {
-      let remaining = type === "safety" ? remainingSafety : remainingTech;
+    function buildWheel(list = names) {
+      const wheel = document.getElementById("wheel");
+      wheel.innerHTML = "";
 
-      if (remaining.length === 0) {
+      if (list.length === 0) return;
+
+      const sliceAngle = 360 / list.length;
+
+      list.forEach((name, i) => {
+        const slice = document.createElement("div");
+        slice.className = "slice";
+        slice.style.transform = `rotate(${sliceAngle * i}deg) skewY(${90 - sliceAngle}deg)`;
+        slice.style.background = i % 2 === 0 ? "#7cc6fe" : "#4da3ff";
+
+        slice.innerHTML = `<div style="transform: skewY(-${90 - sliceAngle}deg) rotate(${sliceAngle / 2}deg)">${name}</div>`;
+        wheel.appendChild(slice);
+      });
+    }
+
+    function startSpin(type) {
+      if (spinning) return;
+
+      let pool = type === "safety" ? remainingSafety : remainingTech;
+
+      if (pool.length === 0) {
         alert("Everyone has gone! Resetting list.");
         if (type === "safety") remainingSafety = [...names];
         else remainingTech = [...names];
-
-        remaining = type === "safety" ? remainingSafety : remainingTech;
+        pool = type === "safety" ? remainingSafety : remainingTech;
       }
 
-      const index = Math.floor(Math.random() * remaining.length);
-      const selected = remaining[index];
+      buildWheel(pool);
 
-      // Remove selected
-      remaining.splice(index, 1);
+      spinning = true;
+      const wheel = document.getElementById("wheel");
 
-      // Save back
-      if (type === "safety")
-        localStorage.setItem("remainingSafety", JSON.stringify(remainingSafety));
-      else
-        localStorage.setItem("remainingTech", JSON.stringify(remainingTech));
+      const index = Math.floor(Math.random() * pool.length);
+      const winner = pool[index];
 
-      document.getElementById("result").innerHTML = 
-        `${type === "safety" ? "Safety Moment:" : "Tech Share:"} <br><br> 🚀 ${selected}`;
+      const sliceAngle = 360 / pool.length;
 
-      showList();
+      const finalRotation = 360 * 8 + (360 - (index * sliceAngle + sliceAngle / 2));
+
+      wheel.style.transform = `rotate(${finalRotation}deg)`;
+
+      setTimeout(() => {
+        spinning = false;
+
+        pool.splice(index, 1);
+        save();
+
+        document.getElementById("result").innerHTML =
+          `${type === "safety" ? "Safety Moment:" : "Tech Share:"}<br><br>🎉 ${winner}`;
+
+        showList();
+      }, 6000);
     }
 
     function showList() {
       document.getElementById("list").innerHTML = `
         <h3>Current Team</h3>
-        <strong>All Names:</strong> ${names.join(", ")} <br><br>
-        <strong>Remaining Safety:</strong> ${remainingSafety.join(", ")} <br><br>
-        <strong>Remaining Tech:</strong> ${remainingTech.join(", ")}
+        <strong>All:</strong> ${names.join(", ")}<br><br>
+        <strong>Safety Remaining:</strong> ${remainingSafety.join(", ")}<br><br>
+        <strong>Tech Remaining:</strong> ${remainingTech.join(", ")}
       `;
     }
 
+    buildWheel(names);
     showList();
   </script>
 
 </body>
 </html>
+
 
