@@ -3,20 +3,18 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Safety & Tech Share Wheel — FINAL FIX</title>
+<title>Safety & Tech Share Wheel — FINAL WORKING VERSION</title>
 
 <style>
 :root {
     --bg: #0b0f17;
     --bg2: #141b29;
-    --glass: rgba(255,255,255,0.06);
-    --glass-border: rgba(255,255,255,0.12);
-    --text: #e9ecf2;
     --accent1: #00eaff;
     --accent2: #ff4da6;
     --accent3: #8a2eff;
+    --glass: rgba(255,255,255,0.07);
     --radius: 18px;
-    --shadow: 0 0 35px rgba(0,0,0,0.5);
+    --text: #e9ecf2;
 }
 
 body {
@@ -31,27 +29,23 @@ body {
     align-items: center;
 }
 
-/* Winner Banner */
 #winnerBanner {
-    margin-top: 12px;
-    padding: 20px 30px;
-    background: linear-gradient(135deg, var(--accent1), var(--accent2), var(--accent3));
+    margin-top: 15px;
+    padding: 18px 28px;
+    background: linear-gradient(135deg, var(--accent1), var(--accent2));
     border-radius: var(--radius);
-    box-shadow: var(--shadow);
-    font-size: 30px;
+    font-size: 28px;
     font-weight: bold;
-    min-height: 55px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    min-height: 50px;
+    text-align: center;
 }
 
-/* Controls */
 .controls {
-    margin-top: 15px;
+    margin-top: 10px;
     display: flex;
     gap: 14px;
 }
+
 .btn {
     padding: 12px 24px;
     border: none;
@@ -61,27 +55,39 @@ body {
     font-size: 17px;
     background: linear-gradient(135deg, var(--accent1), var(--accent3));
 }
+
 .reset-btn {
-    background: linear-gradient(135deg, #ff3b3b, #ff0066);
+    background: linear-gradient(135deg, #ff3333, #ff0066);
 }
 
-/* Pointer */
 #pointer {
     width: 0;
     height: 0;
-    border-left: 28px solid transparent;
-    border-right: 28px solid transparent;
-    border-bottom: 45px solid var(--accent2);
+    border-left: 25px solid transparent;
+    border-right: 25px solid transparent;
+    border-bottom: 40px solid var(--accent2);
     margin: 10px auto;
 }
 
-/* Wheel */
 #wheel {
-    width: 460px;
-    height: 460px;
+    width: 420px;
+    height: 420px;
     border-radius: 50%;
     border: 6px solid rgba(255,255,255,0.2);
-    background: black;
+    background: conic-gradient(
+        var(--accent1) 0deg 30deg,
+        var(--accent2) 30deg 60deg,
+        var(--accent1) 60deg 90deg,
+        var(--accent2) 90deg 120deg,
+        var(--accent1) 120deg 150deg,
+        var(--accent2) 150deg 180deg,
+        var(--accent1) 180deg 210deg,
+        var(--accent2) 210deg 240deg,
+        var(--accent1) 240deg 270deg,
+        var(--accent2) 270deg 300deg,
+        var(--accent1) 300deg 330deg,
+        var(--accent2) 330deg 360deg
+    );
     position: relative;
     overflow: hidden;
     transition: transform 6s cubic-bezier(.14,.78,.23,1);
@@ -97,46 +103,31 @@ body {
     padding-right: 12px;
     font-size: 18px;
     font-weight: bold;
-    pointer-events: none;
     color: white;
 }
 
-/* Panels */
 .sidePanelContainer {
     position: absolute;
-    top: 95px;
+    top: 100px;
     width: 95%;
-    padding: 0 20px;
     display: flex;
     justify-content: space-between;
 }
+
 .panel {
     width: 200px;
     height: 340px;
     background: var(--glass);
-    border: 1px solid var(--glass-border);
-    backdrop-filter: blur(16px);
     border-radius: var(--radius);
     padding: 12px;
     overflow-y: auto;
 }
+
 .listItem {
     padding: 8px;
     margin-bottom: 6px;
-    background: rgba(255,255,255,0.08);
+    background: rgba(255,255,255,0.12);
     border-radius: var(--radius);
-}
-
-/* Confetti */
-.confetti {
-    position: fixed;
-    width: 12px;
-    height: 12px;
-    top: -10px;
-    animation: fall 3s linear forwards;
-}
-@keyframes fall {
-    to { transform: translateY(110vh) rotate(720deg); }
 }
 </style>
 </head>
@@ -167,7 +158,7 @@ body {
 
 <script>
 
-/* --------------------- ROSTER ----------------------- */
+/* ------------------ DATA ------------------ */
 const defaultRoster = [
   "Ali Santiago","Anna Hutchinson","Austin Bartoszek","Brian Kloppe",
   "Casey Williams","Carter Nelson","Christian A. Johnston","Christie Walters",
@@ -178,21 +169,23 @@ const defaultRoster = [
   "Stacie Gray","Steve Lauer","Timothy Costello"
 ];
 
-function loadPool(key, fallback) {
-    let saved = JSON.parse(localStorage.getItem(key));
-    if (!Array.isArray(saved) || saved.length === 0) {
-        localStorage.setItem(key, JSON.stringify([...fallback]));
+function load(key, fallback) {
+    let x = JSON.parse(localStorage.getItem(key));
+    if (!Array.isArray(x) || x.length === 0) {
+        localStorage.setItem(key, JSON.stringify(fallback));
         return [...fallback];
     }
-    return saved;
+    return x;
 }
 
-let names = loadPool("names", defaultRoster);
-let safetyPool = loadPool("safetyPool", names);
-let techPool = loadPool("techPool", names);
-let chosenHistory = loadPool("chosenHistory", []);
+let names = load("names", defaultRoster);
+let safetyPool = load("safetyPool", names);
+let techPool = load("techPool", names);
+let chosenHistory = load("chosenHistory", []);
 
-/* --------------------- SAVE ----------------------- */
+/* ------------------ UTIL ------------------ */
+const initials = name => name.split(" ").map(n => n[0]).join("").toUpperCase();
+
 function saveState() {
     localStorage.setItem("names", JSON.stringify(names));
     localStorage.setItem("safetyPool", JSON.stringify(safetyPool));
@@ -200,48 +193,23 @@ function saveState() {
     localStorage.setItem("chosenHistory", JSON.stringify(chosenHistory));
 }
 
-/* --------------------- LABEL INITIALS ----------------------- */
-const initials = name => name.split(" ").map(w => w[0]).join("").toUpperCase();
-
-/* --------------------- BUILD WHEEL ----------------------- */
-function buildWheel(list) {
+/* ------------------ BUILD WHEEL ------------------ */
+function buildWheel(pool) {
     const wheel = document.getElementById("wheel");
     wheel.innerHTML = "";
 
-    const sliceAngle = 360 / list.length;
-    let gradientParts = [];
+    const angle = 360 / pool.length;
 
-    for (let i = 0; i < list.length; i++) {
-        const start = i * sliceAngle;
-        const end = start + sliceAngle;
-        const col = i % 2 === 0 ? "var(--accent1)" : "var(--accent2)";
-        gradientParts.push(`${col} ${start}deg ${end}deg`);
-    }
-
-    wheel.style.background = `conic-gradient(${gradientParts.join(",")})`;
-
-    list.forEach((name, i) => {
-        const label = document.createElement("div");
-        label.className = "sliceLabel";
-        label.style.transform = `rotate(${i * sliceAngle}deg) translate(0, -50%)`;
-        label.textContent = initials(name);
-        wheel.appendChild(label);
-    });
-}
-
-/* --------------------- CONFETTI ----------------------- */
-function launchConfetti() {
-    for (let i = 0; i < 40; i++) {
-        const c = document.createElement("div");
-        c.className = "confetti";
-        c.style.left = Math.random() * 100 + "vw";
-        c.style.background = ["#ff4da6","#00eaff","#8a2eff","#ffdd00"][Math.floor(Math.random()*4)];
-        document.body.appendChild(c);
-        setTimeout(() => c.remove(), 3000);
+    for (let i = 0; i < pool.length; i++) {
+        const div = document.createElement("div");
+        div.className = "sliceLabel";
+        div.textContent = initials(pool[i]);
+        div.style.transform = `rotate(${i * angle}deg) translate(0, -50%)`;
+        wheel.appendChild(div);
     }
 }
 
-/* --------------------- SPIN (guaranteed to work) ----------------------- */
+/* ------------------ SPIN ------------------ */
 let spinning = false;
 
 function spin(type) {
@@ -249,54 +217,48 @@ function spin(type) {
     spinning = true;
 
     let pool = type === "safety" ? safetyPool : techPool;
-    if (!pool || pool.length === 0) {
-        pool = type === "safety" ? (safetyPool = [...names]) : (techPool = [...names]);
-    }
+    if (pool.length === 0) pool = type === "safety" ? (safetyPool = [...names]) : (techPool = [...names]);
 
     buildWheel(pool);
 
     const wheel = document.getElementById("wheel");
-    const sliceAngle = 360 / pool.length;
+    const angle = 360 / pool.length;
     const index = Math.floor(Math.random() * pool.length);
     const winner = pool[index];
 
-    /* --- HARD RESET (Fix for Safari/Chrome no-spin bug) --- */
     wheel.style.transition = "none";
     wheel.style.transform = "rotate(0.0001deg)";
-    wheel.offsetHeight; // FORCE REPAINT
+    wheel.offsetHeight;
 
-    /* --- APPLY SPIN --- */
-    const landingRotation = 360 * 20 + (360 - (index * sliceAngle + sliceAngle / 2));
+    const landing = 360 * 20 + (360 - (index * angle + angle / 2));
     wheel.style.transition = "transform 6s cubic-bezier(.14,.78,.23,1)";
-    wheel.style.transform = `rotate(${landingRotation}deg)`;
+    wheel.style.transform = `rotate(${landing}deg)`;
 
     setTimeout(() => {
         spinning = false;
-
         pool.splice(index, 1);
         chosenHistory.unshift(winner);
         saveState();
 
-        document.getElementById("winnerBanner").textContent = `🏆 Congratulations, ${winner}!`;
+        document.getElementById("winnerBanner").textContent =
+            `🏆 Congratulations, ${winner}!`;
 
         updateLists();
-        launchConfetti();
-
     }, 6100);
 }
 
-/* --------------------- UPDATE PANELS ----------------------- */
+/* ------------------ LISTS ------------------ */
 function updateLists() {
     document.getElementById("remainingList").innerHTML =
         names.map(n => `<div class='listItem'>${n}</div>`).join("");
+
     document.getElementById("chosenList").innerHTML =
         chosenHistory.map(n => `<div class='listItem'>✔ ${n}</div>`).join("");
 }
 
-/* --------------------- RESET ----------------------- */
+/* ------------------ RESET ------------------ */
 function resetAll() {
     if (!confirm("Reset ALL progress?")) return;
-
     localStorage.clear();
     names = [...defaultRoster];
     safetyPool = [...defaultRoster];
@@ -305,10 +267,9 @@ function resetAll() {
     saveState();
     updateLists();
     buildWheel(names);
-    document.getElementById("winnerBanner").textContent = "Progress Reset.";
 }
 
-/* --------------------- INIT ----------------------- */
+/* ------------------ INIT ------------------ */
 buildWheel(names);
 updateLists();
 
