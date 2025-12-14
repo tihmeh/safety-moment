@@ -1,112 +1,80 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Safety & Tech Share Wheel</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Safety & Tech Wheel</title>
 
 <style>
-/* ---------- GLOBAL UI THEME ---------- */
+
+/* ---------- GLOBAL THEME ---------- */
 :root {
   --bg: #0d1117;
-  --card: rgba(255,255,255,0.08);
-  --glass: rgba(255,255,255,0.12);
   --accent: #00b4ff;
-  --accent2: #ff5f8d;
+  --accent2: #ff4da6;
+  --glass: rgba(255,255,255,0.08);
+  --radius: 14px;
   --text: #e6e6e6;
-  --radius: 16px;
 }
 
 body {
   margin: 0;
-  font-family: "Segoe UI", sans-serif;
   background: var(--bg);
   color: var(--text);
-  display: flex;
-  height: 100vh;
-  overflow: hidden;
-}
-
-/* ---------- PANELS ---------- */
-
-.sidebar, .sidebar-right {
-  width: 22%;
-  padding: 20px;
-  overflow-y: auto;
-  backdrop-filter: blur(16px);
-  background: var(--card);
-  border-right: 1px solid rgba(255,255,255,0.08);
-}
-.sidebar-right {
-  border-right: none;
-  border-left: 1px solid rgba(255,255,255,0.08);
-}
-
-h3 {
-  margin-top: 0;
-  text-transform: uppercase;
-  letter-spacing: 2px;
-  opacity: 0.8;
-}
-
-/* ---------- MAIN AREA ---------- */
-
-.main {
-  flex: 1;
+  font-family: "Segoe UI", sans-serif;
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding-top: 25px;
+  overflow: hidden;
+  height: 100vh;
 }
 
-h2 {
-  margin: 10px;
-  font-size: 28px;
-  letter-spacing: 1px;
-}
-
-/* ---------- INPUT + BUTTONS ---------- */
-input {
-  padding: 12px 15px;
-  width: 280px;
+/* ---------- WINNER BANNER ---------- */
+#winnerBanner {
+  margin-top: 10px;
+  padding: 15px 25px;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
   border-radius: var(--radius);
-  border: none;
-  background: var(--glass);
-  color: var(--text);
-  outline: none;
-  margin-bottom: 10px;
-  font-size: 16px;
+  font-size: 26px;
+  font-weight: bold;
+  color: white;
+  box-shadow: 0 0 18px rgba(0,0,0,0.5);
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ---------- CONTROLS ---------- */
+.controls {
+  margin-top: 10px;
+  display: flex;
+  gap: 12px;
 }
 
 .btn {
-  padding: 12px 22px;
-  margin: 5px;
-  border-radius: var(--radius);
-  font-size: 16px;
-  cursor: pointer;
-  border: none;
+  padding: 10px 18px;
   background: linear-gradient(135deg, var(--accent), var(--accent2));
+  border: none;
+  border-radius: var(--radius);
   color: white;
+  cursor: pointer;
+  font-size: 15px;
   transition: 0.25s;
 }
 .btn:hover {
   transform: scale(1.05);
-  box-shadow: 0 0 12px var(--accent);
 }
 
-/* Reset button style */
+/* Reset button */
 .reset-btn {
-  background: #ff3333;
-}
-.reset-btn:hover {
-  box-shadow: 0 0 12px #ff3333;
+  background: #ff3333 !important;
 }
 
-/* ---------- WHEEL UI ---------- */
-
-#wrapper {
+/* ---------- WHEEL ---------- */
+#wheelContainer {
   position: relative;
-  margin-top: 25px;
+  margin-top: 20px;
 }
 
 #pointer {
@@ -125,85 +93,104 @@ input {
 
 #wheel {
   margin-top: 10px;
-  width: 380px;
-  height: 380px;
+  width: 420px;
+  height: 420px;
   border-radius: 50%;
-  border: 8px solid rgba(255,255,255,0.15);
-  position: relative;
+  background: #111;
+  border: 6px solid rgba(255,255,255,0.15);
   overflow: hidden;
-  background: conic-gradient(var(--accent) 0deg, var(--accent2) 360deg);
+  position: relative;
   transition: transform 6s cubic-bezier(.1, .9, .1, 1);
-  box-shadow: 0 0 25px rgba(0,0,0,0.4);
+  box-shadow: 0 0 25px rgba(0,0,0,0.5);
 }
 
-.slice-label {
+.sliceLabel {
   position: absolute;
-  width: 50%;
   left: 50%;
   top: 50%;
+  width: 50%;
   transform-origin: 0% 50%;
-  text-align: left;
-  padding-left: 10px;
-  font-size: 14px;
-  rotate: -90deg;
-  color: #fff;
+  text-align: right;
+  padding-right: 10px;
+  color: white;
+  font-size: 16px;
+  font-weight: bold;
 }
 
-/* ---------- RESULT ---------- */
-#result {
-  margin-top: 20px;
-  font-size: 24px;
-  height: 60px;
-  text-align: center;
+/* Highlight selected slice */
+.highlight {
+  color: yellow;
+  font-size: 20px !important;
+  text-shadow: 0 0 10px yellow;
 }
 
-/* ---------- LIST STYLES ---------- */
-.list-item {
-  padding: 8px 12px;
+/* ---------- SIDE PANELS ---------- */
+.sidePanelContainer {
+  position: absolute;
+  top: 70px;
+  width: 95%;
+  display: flex;
+  justify-content: space-between;
+  padding: 0 20px;
+}
+
+.panel {
+  width: 180px;
+  height: 300px;
   background: var(--glass);
+  backdrop-filter: blur(14px);
   border-radius: var(--radius);
-  margin-bottom: 8px;
+  padding: 10px;
+  overflow-y: auto;
+  font-size: 14px;
+}
+
+.panel h3 {
+  margin: 5px 0;
+  text-align: center;
+  font-size: 16px;
+}
+
+.listItem {
+  padding: 6px;
+  margin-bottom: 4px;
+  background: rgba(255,255,255,0.07);
+  border-radius: var(--radius);
 }
 </style>
 </head>
 
 <body>
 
-<!-- LEFT PANEL: Remaining -->
-<div class="sidebar">
-  <h3>Remaining</h3>
-  <div id="remainingList"></div>
+<div id="winnerBanner">Spin the wheel!</div>
+
+<div class="controls">
+  <button class="btn" onclick="startSpin('safety')">Spin Safety</button>
+  <button class="btn" onclick="startSpin('tech')">Spin Tech</button>
+  <button class="btn reset-btn" onclick="confirmReset()">Reset</button>
 </div>
 
-<!-- MAIN AREA -->
-<div class="main">
-  <h2>Safety & Tech Wheel</h2>
-
-  <input id="nameInput" placeholder="Add new names" />
-  <button class="btn" onclick="addNames()">Add</button>
-  <button class="btn reset-btn" onclick="triggerReset()">Reset All</button>
-
-  <div>
-    <button class="btn" onclick="startSpin('safety')">Spin Safety</button>
-    <button class="btn" onclick="startSpin('tech')">Spin Tech</button>
-  </div>
-
-  <div id="wrapper">
-    <div id="pointer"></div>
-    <div id="wheel"></div>
-  </div>
-
-  <div id="result"></div>
+<div id="wheelContainer">
+  <div id="pointer"></div>
+  <div id="wheel"></div>
 </div>
 
-<!-- RIGHT PANEL: Chosen -->
-<div class="sidebar-right">
-  <h3>Chosen</h3>
-  <div id="chosenList"></div>
+<!-- SIDE PANELS -->
+<div class="sidePanelContainer">
+  <div class="panel" id="remainingPanel">
+    <h3>Remaining</h3>
+    <div id="remainingList"></div>
+  </div>
+
+  <div class="panel" id="chosenPanel">
+    <h3>Selected</h3>
+    <div id="chosenList"></div>
+  </div>
 </div>
 
 <script>
-/* ---------- DEFAULT ROSTER ---------- */
+
+/* ----------- INITIAL DATA ----------- */
 const defaultRoster = [
   "Ali Santiago","Anna Hutchinson","Austin Bartoszek","Brian Kloppe",
   "Casey Williams","Carter Nelson","Christian A. Johnston","Christie Walters",
@@ -214,37 +201,23 @@ const defaultRoster = [
   "Stacie Gray","Steve Lauer","Timothy Costello"
 ];
 
-/* ---------- LOAD STORAGE OR INIT ---------- */
 let names = JSON.parse(localStorage.getItem("names")) || [...defaultRoster];
-let remainingSafety = JSON.parse(localStorage.getItem("remainingSafety")) || [...defaultRoster];
-let remainingTech = JSON.parse(localStorage.getItem("remainingTech")) || [...defaultRoster];
+let safetyPool = JSON.parse(localStorage.getItem("safetyPool")) || [...defaultRoster];
+let techPool = JSON.parse(localStorage.getItem("techPool")) || [...defaultRoster];
 let chosenHistory = JSON.parse(localStorage.getItem("chosenHistory")) || [];
 
 function save() {
   localStorage.setItem("names", JSON.stringify(names));
-  localStorage.setItem("remainingSafety", JSON.stringify(remainingSafety));
-  localStorage.setItem("remainingTech", JSON.stringify(remainingTech));
+  localStorage.setItem("safetyPool", JSON.stringify(safetyPool));
+  localStorage.setItem("techPool", JSON.stringify(techPool));
   localStorage.setItem("chosenHistory", JSON.stringify(chosenHistory));
 }
 
-/* ---------- RESET WITH CONFIRMATION ---------- */
-function triggerReset() {
-  if (!confirm("⚠️ Are you sure you want to RESET ALL PROGRESS?\nThis cannot be undone.")) {
-    return;
-  }
-
-  localStorage.clear();
-  names = [...defaultRoster];
-  remainingSafety = [...defaultRoster];
-  remainingTech = [...defaultRoster];
-  chosenHistory = [];
-  save();
-  updateLists();
-  buildWheel(names);
-  document.getElementById("result").innerHTML = "Progress Reset.";
+/* ----------- WHEEL RENDER ---------- */
+function getInitials(name) {
+  return name.split(" ").map(w => w[0]).join("").toUpperCase();
 }
 
-/* ---------- BUILD WHEEL ---------- */
 function buildWheel(list) {
   const wheel = document.getElementById("wheel");
   wheel.innerHTML = "";
@@ -252,85 +225,73 @@ function buildWheel(list) {
 
   list.forEach((name, i) => {
     const label = document.createElement("div");
-    label.className = "slice-label";
+    label.className = "sliceLabel";
     label.style.transform = `rotate(${sliceAngle * i}deg) translate(0, -50%)`;
-    label.textContent = name;
+    label.textContent = getInitials(name);
     wheel.appendChild(label);
   });
 }
 
-/* ---------- ADD NAMES ---------- */
-function addNames() {
-  let input = document.getElementById("nameInput").value.trim();
-  if (!input) return;
-
-  let newNames = input.split(",").map(n => n.trim()).filter(n => n);
-
-  newNames.forEach(n => {
-    if (!names.includes(n)) {
-      names.push(n);
-      remainingSafety.push(n);
-      remainingTech.push(n);
-    }
-  });
-
-  document.getElementById("nameInput").value = "";
-  save();
-  updateLists();
-  buildWheel(names);
-}
-
-/* ---------- SPIN ---------- */
+/* ----------- SPIN LOGIC ----------- */
 let spinning = false;
 
 function startSpin(type) {
   if (spinning) return;
   spinning = true;
 
-  let pool = type === "safety" ? remainingSafety : remainingTech;
-
-  if (pool.length === 0) {
-    pool = type === "safety"
-      ? (remainingSafety = [...names])
-      : (remainingTech = [...names]);
-  }
+  let pool = type === "safety" ? safetyPool : techPool;
+  if (pool.length === 0) pool = type === "safety" ? (safetyPool = [...names]) : (techPool = [...names]);
 
   buildWheel(pool);
 
   const wheel = document.getElementById("wheel");
+  const sliceAngle = 360 / pool.length;
 
   const index = Math.floor(Math.random() * pool.length);
   const winner = pool[index];
-  const sliceAngle = 360 / pool.length;
 
-  const finalRotation = 360 * 12 + (360 - (index * sliceAngle + sliceAngle / 2));
-
-  wheel.style.transform = `rotate(${finalRotation}deg)`;
+  const endRotation = 360 * 15 + (360 - (index * sliceAngle + sliceAngle / 2));
+  wheel.style.transform = `rotate(${endRotation}deg)`;
 
   setTimeout(() => {
     spinning = false;
 
     pool.splice(index, 1);
-    chosenHistory.push(winner);
+    chosenHistory.unshift(winner);
     save();
 
-    document.getElementById("result").innerHTML = `🎉 ${winner} 🎉`;
+    document.getElementById("winnerBanner").innerHTML = `🏆 Congratulations, ${winner}!`;
     updateLists();
   }, 6000);
 }
 
-/* ---------- UPDATE LISTS ---------- */
+/* ----------- LIST RENDERING ----------- */
 function updateLists() {
   document.getElementById("remainingList").innerHTML =
-    names.map(n => `<div class="list-item">${n}</div>`).join("");
-
+    names.map(n => `<div class="listItem">${n}</div>`).join("");
   document.getElementById("chosenList").innerHTML =
-    chosenHistory.map(n => `<div class="list-item">✔ ${n}</div>`).join("");
+    chosenHistory.map(n => `<div class="listItem">✔ ${n}</div>`).join("");
 }
 
-/* ---------- INIT ---------- */
+/* ----------- RESET LOGIC ----------- */
+function confirmReset() {
+  if (!confirm("Are you sure you want to reset ALL progress?")) return;
+
+  localStorage.clear();
+  names = [...defaultRoster];
+  safetyPool = [...defaultRoster];
+  techPool = [...defaultRoster];
+  chosenHistory = [];
+  save();
+  updateLists();
+  buildWheel(names);
+  document.getElementById("winnerBanner").innerHTML = "Progress Reset.";
+}
+
+/* ----------- INIT ----------- */
 buildWheel(names);
 updateLists();
+
 </script>
 
 </body>
