@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Safety & Tech Share Wheel</title>
+<title>Safety & Tech Share Wheel — Working Version</title>
 
 <style>
 body {
@@ -15,14 +15,19 @@ body {
     padding: 20px;
 }
 
+h1 { margin-bottom: 10px; }
+
+/* Winner Banner */
 #winnerBanner {
-    font-size: 24px;
-    margin: 20px;
+    font-size: 26px;
+    margin: 15px;
     padding: 15px;
     background: #333;
     border-radius: 10px;
+    transition: transform 0.3s ease;
 }
 
+/* Buttons */
 button {
     padding: 12px 20px;
     margin: 10px;
@@ -31,11 +36,12 @@ button {
     border-radius: 6px;
     color: white;
     cursor: pointer;
+    font-size: 16px;
 }
-button:hover {
-    background: #0056b3;
-}
+button:hover { background: #0056b3; }
+.reset-btn { background: #ff4444 !important; }
 
+/* Pointer */
 #pointer {
     width: 0;
     height: 0;
@@ -45,6 +51,7 @@ button:hover {
     margin: 10px auto;
 }
 
+/* Wheel */
 #wheel {
     width: 350px;
     height: 350px;
@@ -54,7 +61,14 @@ button:hover {
     position: relative;
     overflow: hidden;
     transition: transform 5s cubic-bezier(.17,.67,.12,1.02);
-    background: #222;
+    background: conic-gradient(
+        #00eaff 0deg 30deg, #ff4da6 30deg 60deg,
+        #00eaff 60deg 90deg, #ff4da6 90deg 120deg,
+        #00eaff 120deg 150deg, #ff4da6 150deg 180deg,
+        #00eaff 180deg 210deg, #ff4da6 210deg 240deg,
+        #00eaff 240deg 270deg, #ff4da6 270deg 300deg,
+        #00eaff 300deg 330deg, #ff4da6 330deg 360deg
+    );
 }
 
 .sliceLabel {
@@ -64,19 +78,35 @@ button:hover {
     width: 40%;
     transform-origin: 0% 50%;
     color: white;
-    text-align: right;
     font-size: 18px;
+    font-weight: bold;
     pointer-events: none;
+    text-align: right;
 }
 
+/* Panels */
 .panel {
-    width: 250px;
+    width: 300px;
     margin: 20px auto;
     padding: 15px;
     background: #222;
     border-radius: 10px;
 }
 .listItem { padding: 6px; }
+
+/* Confetti */
+.confetti {
+    position: fixed;
+    width: 12px;
+    height: 12px;
+    top: -10px;
+    opacity: 0.9;
+    animation: fallConfetti 2.5s linear forwards;
+    z-index: 9999;
+}
+@keyframes fallConfetti {
+    to { transform: translateY(110vh) rotate(720deg); }
+}
 </style>
 </head>
 
@@ -88,7 +118,7 @@ button:hover {
 
 <button onclick="spin('safety')">Spin Safety</button>
 <button onclick="spin('tech')">Spin Tech</button>
-<button onclick="resetAll()" style="background:#ff4444;">Reset</button>
+<button class="reset-btn" onclick="resetAll()">Reset</button>
 
 <div id="pointer"></div>
 <div id="wheel"></div>
@@ -99,12 +129,13 @@ button:hover {
 </div>
 
 <div class="panel">
-    <h3>Chosen</h3>
+    <h3>Selected</h3>
     <div id="chosenList"></div>
 </div>
 
 <script>
-/* ------------ DATA ---------------- */
+
+/* ------------------ DATA ------------------ */
 const defaultRoster = [
   "Ali Santiago","Anna Hutchinson","Austin Bartoszek","Brian Kloppe",
   "Casey Williams","Carter Nelson","Christian A. Johnston","Christie Walters",
@@ -132,11 +163,10 @@ function save() {
     localStorage.setItem("chosenHistory", JSON.stringify(chosenHistory));
 }
 
-/* ------------ WHEEL BUILD ---------------- */
-function initials(name) {
-    return name.split(" ").map(x => x[0]).join("").toUpperCase();
-}
+/* ------------------ INITIALS ------------------ */
+const initials = name => name.split(" ").map(w => w[0]).join("").toUpperCase();
 
+/* ------------------ WHEEL BUILD ------------------ */
 function buildWheel(pool) {
     const wheel = document.getElementById("wheel");
     wheel.innerHTML = "";
@@ -146,12 +176,26 @@ function buildWheel(pool) {
         const div = document.createElement("div");
         div.className = "sliceLabel";
         div.textContent = initials(pool[i]);
-        div.style.transform = `rotate(${angle * i}deg) translate(0, -50%)`;
+        div.style.transform = `rotate(${i * angle}deg) translate(0, -50%)`;
         wheel.appendChild(div);
     }
 }
 
-/* ------------ SPIN (WORKING) ---------------- */
+/* ------------------ CONFETTI ------------------ */
+function launchConfetti() {
+    for (let i = 0; i < 50; i++) {
+        const c = document.createElement("div");
+        c.className = "confetti";
+        c.style.left = Math.random() * 100 + "vw";
+        c.style.background = ["#ff4da6","#00eaff","#8a2eff","#ffdd00"]
+            [Math.floor(Math.random()*4)];
+        c.style.animationDuration = (1.5 + Math.random() * 1.5) + "s";
+        document.body.appendChild(c);
+        setTimeout(() => c.remove(), 3000);
+    }
+}
+
+/* ------------------ SPIN ------------------ */
 let spinning = false;
 
 function spin(type) {
@@ -168,12 +212,11 @@ function spin(type) {
     const index = Math.floor(Math.random() * pool.length);
     const winner = pool[index];
 
-    // RESET FIRST so animation always triggers
+    // Reset -> force reflow -> spin
     wheel.style.transition = "none";
     wheel.style.transform = "rotate(0deg)";
-    wheel.offsetHeight; // force reflow
+    wheel.offsetHeight;
 
-    // THEN apply spin
     const finalAngle = 360 * 10 + (360 - (index * angle + angle / 2));
     wheel.style.transition = "transform 5s cubic-bezier(.17,.67,.12,1.02)";
     wheel.style.transform = `rotate(${finalAngle}deg)`;
@@ -183,13 +226,20 @@ function spin(type) {
         pool.splice(index, 1);
         chosenHistory.unshift(winner);
         save();
-        document.getElementById("winnerBanner").textContent =
-            "🏆 Congratulations, " + winner + "!";
+
+        // Winner Banner Animation
+        const banner = document.getElementById("winnerBanner");
+        banner.innerHTML = `🎉🏆 Congratulations, <strong>${winner}</strong>! 🏆🎉`;
+        banner.style.transform = "scale(1.15)";
+        setTimeout(() => banner.style.transform = "scale(1)", 300);
+
+        launchConfetti();
         updateLists();
+
     }, 5100);
 }
 
-/* ------------ UI UPDATES ---------------- */
+/* ------------------ UPDATE LISTS ------------------ */
 function updateLists() {
     document.getElementById("remainingList").innerHTML =
         names.map(n => `<div class='listItem'>${n}</div>`).join("");
@@ -198,20 +248,23 @@ function updateLists() {
         chosenHistory.map(n => `<div class='listItem'>✔ ${n}</div>`).join("");
 }
 
-/* ------------ RESET ---------------- */
+/* ------------------ RESET ------------------ */
 function resetAll() {
-    if (!confirm("Reset all progress?")) return;
+    if (!confirm("Reset ALL progress?")) return;
+
     localStorage.clear();
     names = [...defaultRoster];
     safetyPool = [...defaultRoster];
     techPool = [...defaultRoster];
     chosenHistory = [];
     save();
+
     buildWheel(names);
     updateLists();
+    document.getElementById("winnerBanner").textContent = "Progress Reset.";
 }
 
-/* ------------ INIT ---------------- */
+/* ------------------ INIT ------------------ */
 buildWheel(names);
 updateLists();
 
