@@ -1,154 +1,207 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Safety & Tech Wheel</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Safety & Tech Share Wheel — Elite Edition</title>
 
 <style>
-
-/* ---------- GLOBAL THEME ---------- */
+/* -----------------------------------------------------------
+   GLOBAL THEME — cinematic glass, neons, depth, gradients
+----------------------------------------------------------- */
 :root {
-  --bg: #0d1117;
-  --accent: #00b4ff;
-  --accent2: #ff4da6;
-  --glass: rgba(255,255,255,0.08);
-  --radius: 14px;
-  --text: #e6e6e6;
+    --bg: #0b0f17;
+    --bg2: #141b29;
+    --glass: rgba(255,255,255,0.06);
+    --glass-border: rgba(255,255,255,0.12);
+    --text: #e9ecf2;
+    --accent1: #00eaff;
+    --accent2: #ff4da6;
+    --accent3: #8a2eff;
+    --radius: 18px;
+    --shadow: 0 0 35px rgba(0,0,0,0.5);
 }
 
 body {
-  margin: 0;
-  background: var(--bg);
-  color: var(--text);
-  font-family: "Segoe UI", sans-serif;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  overflow: hidden;
-  height: 100vh;
+    margin: 0;
+    background: radial-gradient(circle at top, var(--bg2), var(--bg));
+    font-family: "Segoe UI", sans-serif;
+    color: var(--text);
+    overflow: hidden;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    perspective: 2000px;
 }
 
-/* ---------- WINNER BANNER ---------- */
+/* -----------------------------------------------------------
+   WINNER BANNER
+----------------------------------------------------------- */
 #winnerBanner {
-  margin-top: 10px;
-  padding: 15px 25px;
-  background: linear-gradient(135deg, var(--accent), var(--accent2));
-  border-radius: var(--radius);
-  font-size: 26px;
-  font-weight: bold;
-  color: white;
-  box-shadow: 0 0 18px rgba(0,0,0,0.5);
-  min-height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+    margin-top: 12px;
+    padding: 20px 30px;
+    background: linear-gradient(135deg, var(--accent1), var(--accent2), var(--accent3));
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    font-size: 30px;
+    font-weight: 700;
+    min-height: 55px;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    letter-spacing: 1.5px;
+    text-shadow: 0 0 20px rgba(255,255,255,0.5);
+    border: 2px solid rgba(255,255,255,0.25);
 }
 
-/* ---------- CONTROLS ---------- */
+/* -----------------------------------------------------------
+   BUTTON CONTROLS
+----------------------------------------------------------- */
 .controls {
-  margin-top: 10px;
-  display: flex;
-  gap: 12px;
+    margin-top: 15px;
+    display: flex;
+    gap: 14px;
 }
 
 .btn {
-  padding: 10px 18px;
-  background: linear-gradient(135deg, var(--accent), var(--accent2));
-  border: none;
-  border-radius: var(--radius);
-  color: white;
-  cursor: pointer;
-  font-size: 15px;
-  transition: 0.25s;
+    padding: 12px 24px;
+    background: linear-gradient(135deg, var(--accent1), var(--accent3));
+    border: none;
+    border-radius: var(--radius);
+    color: var(--text);
+    cursor: pointer;
+    font-size: 17px;
+    letter-spacing: 0.7px;
+    transition: all 0.25s ease;
+    box-shadow: 0 0 12px rgba(0,0,0,0.3);
+    border: 1px solid var(--glass-border);
+    transform: translateZ(0);
 }
 
 .btn:hover {
-  transform: scale(1.05);
+    transform: translateY(-4px) scale(1.05);
+    box-shadow: 0 0 22px var(--accent1);
 }
 
 .reset-btn {
-  background: #ff3333 !important;
+    background: linear-gradient(135deg, #ff3b3b, #ff0066);
 }
 
-/* ---------- WHEEL ---------- */
+.reset-btn:hover {
+    box-shadow: 0 0 22px #ff3b3b;
+}
+
+/* -----------------------------------------------------------
+   WHEEL CONTAINER
+----------------------------------------------------------- */
 #wheelContainer {
-  position: relative;
-  margin-top: 20px;
+    margin-top: 30px;
+    transform-style: preserve-3d;
 }
 
 #pointer {
-  width: 0;
-  height: 0;
-  border-left: 22px solid transparent;
-  border-right: 22px solid transparent;
-  border-bottom: 35px solid var(--accent2);
-  margin: 0 auto;
-  animation: pulse 1s infinite alternate;
+    width: 0;
+    height: 0;
+    border-left: 28px solid transparent;
+    border-right: 28px solid transparent;
+    border-bottom: 45px solid var(--accent2);
+    margin: 0 auto 5px;
+    animation: pulse 1s infinite alternate ease-in-out;
+    filter: drop-shadow(0 0 10px var(--accent2));
 }
-
 @keyframes pulse {
-  from { transform: translateY(0); }
-  to { transform: translateY(-4px); }
+    from { transform: translateY(0); }
+    to { transform: translateY(-6px); }
 }
 
+/* -----------------------------------------------------------
+   WHEEL — 3D, glass, neon
+----------------------------------------------------------- */
 #wheel {
-  margin-top: 10px;
-  width: 420px;
-  height: 420px;
-  border-radius: 50%;
-  border: 6px solid rgba(255,255,255,0.15);
-  overflow: hidden;
-  position: relative;
-  transition: transform 6s cubic-bezier(.1, .9, .1, 1);
-  box-shadow: 0 0 25px rgba(0,0,0,0.5);
+    width: 460px;
+    height: 460px;
+    border-radius: 50%;
+    position: relative;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    border: 6px solid rgba(255,255,255,0.15);
+    transition: transform 6s cubic-bezier(.14,.78,.23,1);
+    background: #000;
 }
 
+/* TEXT LABELS */
 .sliceLabel {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  width: 50%;
-  transform-origin: 0% 50%;
-  text-align: right;
-  padding-right: 10px;
-  color: white;
-  font-size: 16px;
-  font-weight: bold;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 48%;
+    transform-origin: 0% 50%;
+    text-align: right;
+    padding-right: 14px;
+    font-size: 18px;
+    font-weight: bold;
+    pointer-events: none;
+    color: white;
+    text-shadow: 0 0 8px black;
 }
 
-/* ---------- SIDE PANELS ---------- */
+/* -----------------------------------------------------------
+   SIDE PANELS — redesigned card layout
+----------------------------------------------------------- */
 .sidePanelContainer {
-  position: absolute;
-  top: 70px;
-  width: 95%;
-  display: flex;
-  justify-content: space-between;
-  padding: 0 20px;
+    position: absolute;
+    top: 95px;
+    width: 95%;
+    padding: 0 20px;
+    display: flex;
+    justify-content: space-between;
 }
 
 .panel {
-  width: 180px;
-  height: 300px;
-  background: var(--glass);
-  backdrop-filter: blur(14px);
-  border-radius: var(--radius);
-  padding: 10px;
-  overflow-y: auto;
-  font-size: 14px;
+    width: 200px;
+    height: 340px;
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(16px);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 12px;
+    overflow-y: auto;
+    font-size: 15px;
 }
 
 .panel h3 {
-  margin: 5px 0;
-  text-align: center;
-  font-size: 16px;
+    margin: 5px 0 10px;
+    text-align: center;
+    font-size: 18px;
+    letter-spacing: 1px;
 }
 
 .listItem {
-  padding: 6px;
-  margin-bottom: 4px;
-  background: rgba(255,255,255,0.07);
-  border-radius: var(--radius);
+    padding: 8px;
+    margin-bottom: 6px;
+    background: rgba(255,255,255,0.08);
+    border-radius: var(--radius);
+    font-size: 14px;
+}
+
+/* -----------------------------------------------------------
+   CONFETTI EFFECT
+----------------------------------------------------------- */
+.confetti {
+    position: fixed;
+    width: 12px;
+    height: 12px;
+    background: red;
+    top: -10px;
+    animation: fall 2.5s linear forwards;
+    opacity: 0.9;
+    z-index: 99999;
+}
+@keyframes fall {
+    to { transform: translateY(110vh) rotate(720deg); }
 }
 
 </style>
@@ -156,158 +209,194 @@ body {
 
 <body>
 
-<div id="winnerBanner">Spin the wheel!</div>
+<!-- WINNER BANNER -->
+<div id="winnerBanner">Spin the Wheel!</div>
 
+<!-- BUTTONS -->
 <div class="controls">
-  <button class="btn" onclick="startSpin('safety')">Spin Safety</button>
-  <button class="btn" onclick="startSpin('tech')">Spin Tech</button>
-  <button class="btn reset-btn" onclick="confirmReset()">Reset</button>
+    <button class="btn" onclick="spin('safety')">Spin Safety</button>
+    <button class="btn" onclick="spin('tech')">Spin Tech</button>
+    <button class="btn reset-btn" onclick="resetAll()">Reset</button>
 </div>
 
+<!-- WHEEL -->
 <div id="wheelContainer">
-  <div id="pointer"></div>
-  <div id="wheel"></div>
+    <div id="pointer"></div>
+    <div id="wheel"></div>
 </div>
 
+<!-- SIDE PANELS -->
 <div class="sidePanelContainer">
-  <div class="panel">
-    <h3>Remaining</h3>
-    <div id="remainingList"></div>
-  </div>
+    <div class="panel">
+        <h3>Remaining</h3>
+        <div id="remainingList"></div>
+    </div>
 
-  <div class="panel">
-    <h3>Selected</h3>
-    <div id="chosenList"></div>
-  </div>
+    <div class="panel">
+        <h3>Selected</h3>
+        <div id="chosenList"></div>
+    </div>
 </div>
 
 <script>
 
-/* ---------- DEFAULT ROSTER ---------- */
+/* -----------------------------------------------------------
+   MASTER ROSTER
+----------------------------------------------------------- */
 const defaultRoster = [
-  "Ali Santiago","Anna Hutchinson","Austin Bartoszek","Brian Kloppe",
-  "Casey Williams","Carter Nelson","Christian A. Johnston","Christie Walters",
-  "Daniel Taggart","Emiliano Garcia","Frank Bottiglieri","Grace Frigaard",
-  "Greg Waters","Ian Manhoo","Jim Pesek","Julissa Vergara",
-  "Kevin Ferm","Kyle Young","Mark Besser","Patrick McCarron",
-  "Rey Rodriguez","Richard Fredette","Shaun Thomas","Shane Bowen",
-  "Stacie Gray","Steve Lauer","Timothy Costello"
+    "Ali Santiago","Anna Hutchinson","Austin Bartoszek","Brian Kloppe",
+    "Casey Williams","Carter Nelson","Christian A. Johnston","Christie Walters",
+    "Daniel Taggart","Emiliano Garcia","Frank Bottiglieri","Grace Frigaard",
+    "Greg Waters","Ian Manhoo","Jim Pesek","Julissa Vergara",
+    "Kevin Ferm","Kyle Young","Mark Besser","Patrick McCarron",
+    "Rey Rodriguez","Richard Fredette","Shaun Thomas","Shane Bowen",
+    "Stacie Gray","Steve Lauer","Timothy Costello"
 ];
 
-/* ---------- SAFE LOADING FUNCTION ---------- */
+/* -----------------------------------------------------------
+   LOAD / REPAIR STORAGE
+----------------------------------------------------------- */
 function loadPool(key, fallback) {
-  let saved = JSON.parse(localStorage.getItem(key));
-
-  if (!Array.isArray(saved) || saved.length === 0) {
-    localStorage.setItem(key, JSON.stringify([...fallback]));
-    return [...fallback];
-  }
-  return saved;
+    let saved = JSON.parse(localStorage.getItem(key));
+    if (!Array.isArray(saved) || saved.length === 0) {
+        localStorage.setItem(key, JSON.stringify([...fallback]));
+        return [...fallback];
+    }
+    return saved;
 }
 
-/* ---------- LOAD POOLS SAFELY ---------- */
 let names = loadPool("names", defaultRoster);
 let safetyPool = loadPool("safetyPool", names);
 let techPool = loadPool("techPool", names);
 let chosenHistory = loadPool("chosenHistory", []);
 
-/* ---------- SAVE ---------- */
-function save() {
-  localStorage.setItem("names", JSON.stringify(names));
-  localStorage.setItem("safetyPool", JSON.stringify(safetyPool));
-  localStorage.setItem("techPool", JSON.stringify(techPool));
-  localStorage.setItem("chosenHistory", JSON.stringify(chosenHistory));
+/* SAVE */
+function saveState() {
+    localStorage.setItem("names", JSON.stringify(names));
+    localStorage.setItem("safetyPool", JSON.stringify(safetyPool));
+    localStorage.setItem("techPool", JSON.stringify(techPool));
+    localStorage.setItem("chosenHistory", JSON.stringify(chosenHistory));
 }
 
-/* ---------- INITIALS ---------- */
-function getInitials(name) {
-  return name.split(" ").map(w => w[0]).join("").toUpperCase();
-}
+/* -----------------------------------------------------------
+   UTILITIES
+----------------------------------------------------------- */
+const initials = name =>
+    name.split(" ").map(w => w[0]).join("").toUpperCase();
 
-/* ---------- DRAW WHEEL ---------- */
+/* -----------------------------------------------------------
+   BUILD WHEEL (slices + labels)
+----------------------------------------------------------- */
 function buildWheel(list) {
-  const wheel = document.getElementById("wheel");
-  wheel.innerHTML = "";
+    const wheel = document.getElementById("wheel");
+    wheel.innerHTML = "";
 
-  const sliceAngle = 360 / list.length;
-  let gradientParts = [];
+    const sliceAngle = 360 / list.length;
 
-  list.forEach((name, i) => {
-    const start = i * sliceAngle;
-    const end = start + sliceAngle;
-    const color = i % 2 === 0 ? "var(--accent)" : "var(--accent2)";
-    gradientParts.push(`${color} ${start}deg ${end}deg`);
-  });
+    // Build alternating slice colors
+    let gradient = [];
+    for (let i = 0; i < list.length; i++) {
+        const start = i * sliceAngle;
+        const end = start + sliceAngle;
+        const col = i % 2 === 0 ? "var(--accent1)" : "var(--accent2)";
+        gradient.push(`${col} ${start}deg ${end}deg`);
+    }
 
-  wheel.style.background = `conic-gradient(${gradientParts.join(",")})`;
+    wheel.style.background = `conic-gradient(${gradient.join(",")})`;
 
-  list.forEach((name, i) => {
-    const label = document.createElement("div");
-    label.className = "sliceLabel";
-    label.style.transform = `rotate(${sliceAngle * i}deg) translate(0, -50%)`;
-    label.textContent = getInitials(name);
-    wheel.appendChild(label);
-  });
+    list.forEach((name, i) => {
+        const label = document.createElement("div");
+        label.className = "sliceLabel";
+        label.style.transform = `rotate(${sliceAngle * i}deg) translate(0,-50%)`;
+        label.textContent = initials(name);
+        wheel.appendChild(label);
+    });
 }
 
-/* ---------- SPIN FUNCTION ---------- */
+/* -----------------------------------------------------------
+   CONFETTI ON WIN
+----------------------------------------------------------- */
+function launchConfetti() {
+    for (let i = 0; i < 60; i++) {
+        const c = document.createElement("div");
+        c.className = "confetti";
+        c.style.left = Math.random() * 100 + "vw";
+        c.style.background = ["#ff4da6","#00eaff","#8a2eff","#ffdd00"][Math.floor(Math.random()*4)];
+        c.style.animationDuration = (1.8 + Math.random()*1.8) + "s";
+        document.body.appendChild(c);
+        setTimeout(() => c.remove(), 3000);
+    }
+}
+
+/* -----------------------------------------------------------
+   SPIN FUNCTION
+----------------------------------------------------------- */
 let spinning = false;
 
-function startSpin(type) {
-  if (spinning) return;
-  spinning = true;
+function spin(type) {
+    if (spinning) return;
+    spinning = true;
 
-  let pool = type === "safety" ? safetyPool : techPool;
-  if (pool.length === 0) pool = type === "safety" ? (safetyPool = [...names]) : (techPool = [...names]);
+    let pool = type === "safety" ? safetyPool : techPool;
+    if (pool.length === 0) pool = type === "safety" ? (safetyPool = [...names]) : (techPool = [...names]);
 
-  buildWheel(pool);
+    buildWheel(pool);
 
-  const wheel = document.getElementById("wheel");
-  const sliceAngle = 360 / pool.length;
+    const wheel = document.getElementById("wheel");
+    const sliceAngle = 360 / pool.length;
+    const index = Math.floor(Math.random() * pool.length);
+    const winner = pool[index];
 
-  const index = Math.floor(Math.random() * pool.length);
-  const winner = pool[index];
+    const landingRotation = 360 * 14 + (360 - (index * sliceAngle + sliceAngle / 2));
+    wheel.style.transform = `rotate(${landingRotation}deg)`;
 
-  const endRotation = 360 * 12 + (360 - (index * sliceAngle + sliceAngle / 2));
-  wheel.style.transform = `rotate(${endRotation}deg)`;
+    setTimeout(() => {
+        spinning = false;
 
-  setTimeout(() => {
-    spinning = false;
+        pool.splice(index, 1);
+        chosenHistory.unshift(winner);
+        saveState();
 
-    pool.splice(index, 1);
-    chosenHistory.unshift(winner);
-    save();
+        document.getElementById("winnerBanner").innerHTML = `🏆 Congratulations, ${winner}!`;
 
-    document.getElementById("winnerBanner").innerHTML = `🏆 Congratulations, ${winner}!`;
-    updateLists();
-  }, 6000);
+        updateLists();
+        launchConfetti();
+    }, 6000);
 }
 
-/* ---------- UPDATE LISTS ---------- */
+/* -----------------------------------------------------------
+   LIST RENDERING
+----------------------------------------------------------- */
 function updateLists() {
-  document.getElementById("remainingList").innerHTML =
-    names.map(n => `<div class='listItem'>${n}</div>`).join("");
+    document.getElementById("remainingList").innerHTML =
+        names.map(n => `<div class='listItem'>${n}</div>`).join("");
 
-  document.getElementById("chosenList").innerHTML =
-    chosenHistory.map(n => `<div class='listItem'>✔ ${n}</div>`).join("");
+    document.getElementById("chosenList").innerHTML =
+        chosenHistory.map(n => `<div class='listItem'>✔ ${n}</div>`).join("");
 }
 
-/* ---------- RESET ---------- */
-function confirmReset() {
-  if (!confirm("Reset ALL progress?")) return;
+/* -----------------------------------------------------------
+   RESET
+----------------------------------------------------------- */
+function resetAll() {
+    if (!confirm("Are you sure you want to reset ALL progress?")) return;
 
-  localStorage.clear();
-  names = [...defaultRoster];
-  safetyPool = [...defaultRoster];
-  techPool = [...defaultRoster];
-  chosenHistory = [];
-  save();
-  updateLists();
-  buildWheel(names);
-  document.getElementById("winnerBanner").textContent = "Progress Reset.";
+    localStorage.clear();
+    names = [...defaultRoster];
+    safetyPool = [...defaultRoster];
+    techPool = [...defaultRoster];
+    chosenHistory = [];
+
+    saveState();
+    updateLists();
+    buildWheel(names);
+
+    document.getElementById("winnerBanner").innerHTML = "Progress Reset.";
 }
 
-/* ---------- INIT ---------- */
+/* -----------------------------------------------------------
+   INIT
+----------------------------------------------------------- */
 buildWheel(names);
 updateLists();
 
@@ -315,4 +404,3 @@ updateLists();
 
 </body>
 </html>
-
