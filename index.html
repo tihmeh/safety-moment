@@ -9,28 +9,44 @@
     body {
       font-family: Arial, sans-serif;
       background: #f5f5f5;
-      padding: 40px;
-      text-align: center;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: row;
+      height: 100vh;
+      overflow: hidden;
     }
 
-    h1 { margin-bottom: 10px; }
-
-    .btn {
-      margin: 10px;
-      padding: 15px 25px;
-      font-size: 18px;
-      cursor: pointer;
-      background: #0070f3;
-      color: white;
-      border: none;
-      border-radius: 6px;
+    .sidebar {
+      width: 22%;
+      background: #ffffff;
+      padding: 20px;
+      overflow-y: auto;
+      border-right: 2px solid #ddd;
     }
-    .btn:hover { background: #0059c9; }
+
+    .sidebar-right {
+      width: 22%;
+      background: #ffffff;
+      padding: 20px;
+      overflow-y: auto;
+      border-left: 2px solid #ddd;
+    }
+
+    .main {
+      width: 56%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding-top: 20px;
+    }
+
+    h2, h3 { margin-top: 0; text-align: center; }
 
     #wheel {
-      margin: 40px auto;
-      width: 300px;
-      height: 300px;
+      margin-top: 20px;
+      width: 350px;
+      height: 350px;
       border: 10px solid #333;
       border-radius: 50%;
       position: relative;
@@ -46,13 +62,14 @@
       top: 50%;
       left: 50%;
       transform-origin: 0% 0%;
-      background: #ccc;
       border: 1px solid #fff;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 14px;
+      font-size: 12px;
       text-align: center;
+      color: #000;
+      padding: 3px;
     }
 
     #pointer {
@@ -61,130 +78,126 @@
       border-left: 20px solid transparent;
       border-right: 20px solid transparent;
       border-bottom: 30px solid red;
-      margin: 0 auto;
-      margin-bottom: -20px;
+      margin-top: 10px;
+    }
+
+    input {
+      padding: 10px;
+      font-size: 16px;
+      width: 250px;
+      margin-bottom: 10px;
+    }
+
+    .btn {
+      padding: 10px 20px;
+      margin: 5px;
+      background: #0070f3;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    .btn:hover {
+      background: #005ad1;
     }
 
     #result {
-      margin-top: 30px;
-      font-size: 26px;
+      margin-top: 20px;
+      font-size: 22px;
       font-weight: bold;
-    }
-
-    #list { margin-top: 30px; font-size: 16px; }
-
-    #nameInput {
-      padding: 10px;
-      font-size: 16px;
-      width: 300px;
+      text-align: center;
+      height: 60px;
     }
   </style>
 </head>
-
 <body>
 
-  <h1>Safety Moment & Tech Share Wheel</h1>
+  <div class="sidebar">
+    <h3>Remaining People</h3>
+    <div id="remainingList"></div>
+  </div>
 
-  <p>Add new names (comma-separated):</p>
+  <div class="main">
 
-  <input id="nameInput" placeholder="Enter name(s)">
-  <br><br>
-  <button class="btn" onclick="addNames()">Add Name(s)</button>
+    <h2>Safety & Tech Share Wheel</h2>
 
-  <hr>
+    <input id="nameInput" placeholder="Add new name(s)">
+    <button class="btn" onclick="addNames()">Add</button>
 
-  <button class="btn" onclick="startSpin('safety')">Spin for Safety Moment</button>
-  <button class="btn" onclick="startSpin('tech')">Spin for Tech Share</button>
+    <div>
+      <button class="btn" onclick="startSpin('safety')">Spin Safety Moment</button>
+      <button class="btn" onclick="startSpin('tech')">Spin Tech Share</button>
+    </div>
 
-  <div id="pointer"></div>
-  <div id="wheel"></div>
+    <div id="pointer"></div>
+    <div id="wheel"></div>
 
-  <div id="result"></div>
-  <div id="list"></div>
+    <div id="result"></div>
+  </div>
+
+  <div class="sidebar-right">
+    <h3>Already Chosen</h3>
+    <div id="chosenList"></div>
+  </div>
 
   <script>
-    // Default roster — loaded only if no saved roster exists
     const defaultRoster = [
-      "Ali Santiago",
-      "Anna Hutchinson",
-      "Austin Bartoszek",
-      "Brian Kloppe",
-      "Casey Williams",
-      "Carter Nelson",
-      "Christian A. Johnston",
-      "Christie Walters",
-      "Daniel Taggart",
-      "Emiliano Garcia",
-      "Frank Bottiglieri",
-      "Grace Frigaard",
-      "Greg Waters",
-      "Ian Manhoo",
-      "Jim Pesek",
-      "Julissa Vergara",
-      "Kevin Ferm",
-      "Kyle Young",
-      "Lindsey Stewart",
-      "Mark Besser",
-      "Patrick McCarron",
-      "Rey Rodriguez",
-      "Richard Fredette",
-      "Shaun Thomas",
-      "Shane Bowen",
-      "Stacie Gray",
-      "Steve Lauer",
-      "Timothy Costello"
+      "Ali Santiago","Anna Hutchinson","Austin Bartoszek","Brian Kloppe",
+      "Casey Williams","Carter Nelson","Christian A. Johnston","Christie Walters",
+      "Daniel Taggart","Emiliano Garcia","Frank Bottiglieri","Grace Frigaard",
+      "Greg Waters","Ian Manhoo","Jim Pesek","Julissa Vergara",
+      "Kevin Ferm","Kyle Young","Mark Besser",
+      "Patrick McCarron","Rey Rodriguez","Richard Fredette","Shaun Thomas",
+      "Shane Bowen","Stacie Gray","Steve Lauer","Timothy Costello"
     ];
 
-    // Load saved data or initialize with default
     let names = JSON.parse(localStorage.getItem("names"));
     let remainingSafety = JSON.parse(localStorage.getItem("remainingSafety"));
     let remainingTech = JSON.parse(localStorage.getItem("remainingTech"));
+    let chosenHistory = JSON.parse(localStorage.getItem("chosenHistory"));
 
     if (!names) {
       names = [...defaultRoster];
       remainingSafety = [...defaultRoster];
       remainingTech = [...defaultRoster];
+      chosenHistory = [];
       save();
     }
-
-    let spinning = false;
 
     function save() {
       localStorage.setItem("names", JSON.stringify(names));
       localStorage.setItem("remainingSafety", JSON.stringify(remainingSafety));
       localStorage.setItem("remainingTech", JSON.stringify(remainingTech));
+      localStorage.setItem("chosenHistory", JSON.stringify(chosenHistory));
     }
 
     function addNames() {
-      const input = document.getElementById("nameInput").value;
-      if (!input.trim()) {
-        alert("Enter a name first.");
-        return;
-      }
+      let input = document.getElementById("nameInput").value.trim();
+      if (!input) return;
 
-      const newNames = input.split(",").map(n => n.trim()).filter(n => n.length > 0);
+      let newNames = input.split(",").map(n => n.trim()).filter(n => n.length > 0);
 
-      newNames.forEach(name => {
-        if (!names.includes(name)) {
-          names.push(name);
-          remainingSafety.push(name);
-          remainingTech.push(name);
+      newNames.forEach(n => {
+        if (!names.includes(n)) {
+          names.push(n);
+          remainingSafety.push(n);
+          remainingTech.push(n);
         }
       });
 
       save();
       document.getElementById("nameInput").value = "";
-      showList();
+      updateLists();
       buildWheel();
-      alert("Added!");
     }
+
+    let spinning = false;
 
     function buildWheel(list = names) {
       const wheel = document.getElementById("wheel");
       wheel.innerHTML = "";
-
-      if (list.length === 0) return;
-
       const sliceAngle = 360 / list.length;
 
       list.forEach((name, i) => {
@@ -192,8 +205,10 @@
         slice.className = "slice";
         slice.style.transform = `rotate(${sliceAngle * i}deg) skewY(${90 - sliceAngle}deg)`;
         slice.style.background = i % 2 === 0 ? "#7cc6fe" : "#4da3ff";
-
-        slice.innerHTML = `<div style="transform: skewY(-${90 - sliceAngle}deg) rotate(${sliceAngle / 2}deg)">${name}</div>`;
+        slice.innerHTML = `
+          <div style="transform: skewY(-${90 - sliceAngle}deg) rotate(${sliceAngle / 2}deg)">
+            ${name}
+          </div>`;
         wheel.appendChild(slice);
       });
     }
@@ -205,9 +220,9 @@
 
       if (pool.length === 0) {
         alert("Everyone has gone! Resetting list.");
-        if (type === "safety") remainingSafety = [...names];
-        else remainingTech = [...names];
-        pool = type === "safety" ? remainingSafety : remainingTech;
+        pool = type === "safety"
+          ? (remainingSafety = [...names])
+          : (remainingTech = [...names]);
       }
 
       buildWheel(pool);
@@ -217,10 +232,10 @@
 
       const index = Math.floor(Math.random() * pool.length);
       const winner = pool[index];
-
       const sliceAngle = 360 / pool.length;
 
-      const finalRotation = 360 * 8 + (360 - (index * sliceAngle + sliceAngle / 2));
+      const finalRotation =
+        360 * 8 + (360 - (index * sliceAngle + sliceAngle / 2));
 
       wheel.style.transform = `rotate(${finalRotation}deg)`;
 
@@ -228,29 +243,27 @@
         spinning = false;
 
         pool.splice(index, 1);
+        chosenHistory.push(winner);
         save();
 
         document.getElementById("result").innerHTML =
           `${type === "safety" ? "Safety Moment:" : "Tech Share:"}<br><br>🎉 ${winner}`;
 
-        showList();
+        updateLists();
       }, 6000);
     }
 
-    function showList() {
-      document.getElementById("list").innerHTML = `
-        <h3>Current Team</h3>
-        <strong>All:</strong> ${names.join(", ")}<br><br>
-        <strong>Safety Remaining:</strong> ${remainingSafety.join(", ")}<br><br>
-        <strong>Tech Remaining:</strong> ${remainingTech.join(", ")}
-      `;
+    function updateLists() {
+      document.getElementById("remainingList").innerHTML =
+        names.map(n => `<div>${n}</div>`).join("");
+
+      document.getElementById("chosenList").innerHTML =
+        chosenHistory.map(n => `<div>✔ ${n}</div>`).join("");
     }
 
     buildWheel(names);
-    showList();
+    updateLists();
   </script>
 
 </body>
 </html>
-
-
