@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Safety & Tech Share Wheel — FINAL WORKING VERSION</title>
+<title>Safety & Tech Share Wheel — Guaranteed Spin Version</title>
 
 <style>
 :root {
@@ -13,8 +13,8 @@
     --accent2: #ff4da6;
     --accent3: #8a2eff;
     --glass: rgba(255,255,255,0.07);
-    --radius: 18px;
     --text: #e9ecf2;
+    --radius: 18px;
 }
 
 body {
@@ -29,9 +29,10 @@ body {
     align-items: center;
 }
 
+/* Winner Banner */
 #winnerBanner {
-    margin-top: 15px;
-    padding: 18px 28px;
+    margin-top: 12px;
+    padding: 20px 30px;
     background: linear-gradient(135deg, var(--accent1), var(--accent2));
     border-radius: var(--radius);
     font-size: 28px;
@@ -40,32 +41,25 @@ body {
     text-align: center;
 }
 
-.controls {
-    margin-top: 10px;
-    display: flex;
-    gap: 14px;
-}
-
+/* Buttons */
+.controls { margin-top: 15px; display: flex; gap: 14px; }
 .btn {
-    padding: 12px 24px;
-    border: none;
+    padding: 12px 22px;
     border-radius: var(--radius);
-    color: white;
-    cursor: pointer;
-    font-size: 17px;
     background: linear-gradient(135deg, var(--accent1), var(--accent3));
+    border: none;
+    cursor: pointer;
+    color: white;
+    font-size: 16px;
 }
+.reset-btn { background: linear-gradient(135deg, #ff3333, #ff0066); }
 
-.reset-btn {
-    background: linear-gradient(135deg, #ff3333, #ff0066);
-}
-
+/* Wheel + Pointer */
 #pointer {
-    width: 0;
-    height: 0;
+    width: 0; height: 0;
     border-left: 25px solid transparent;
     border-right: 25px solid transparent;
-    border-bottom: 40px solid var(--accent2);
+    border-bottom: 45px solid var(--accent2);
     margin: 10px auto;
 }
 
@@ -74,29 +68,15 @@ body {
     height: 420px;
     border-radius: 50%;
     border: 6px solid rgba(255,255,255,0.2);
-    background: conic-gradient(
-        var(--accent1) 0deg 30deg,
-        var(--accent2) 30deg 60deg,
-        var(--accent1) 60deg 90deg,
-        var(--accent2) 90deg 120deg,
-        var(--accent1) 120deg 150deg,
-        var(--accent2) 150deg 180deg,
-        var(--accent1) 180deg 210deg,
-        var(--accent2) 210deg 240deg,
-        var(--accent1) 240deg 270deg,
-        var(--accent2) 270deg 300deg,
-        var(--accent1) 300deg 330deg,
-        var(--accent2) 330deg 360deg
-    );
+    background: black;
     position: relative;
     overflow: hidden;
-    transition: transform 6s cubic-bezier(.14,.78,.23,1);
+    transform: rotate(0deg);
 }
 
 .sliceLabel {
     position: absolute;
-    left: 50%;
-    top: 50%;
+    left: 50%; top: 50%;
     width: 48%;
     transform-origin: 0% 50%;
     text-align: right;
@@ -106,6 +86,7 @@ body {
     color: white;
 }
 
+/* Panels */
 .sidePanelContainer {
     position: absolute;
     top: 100px;
@@ -158,7 +139,7 @@ body {
 
 <script>
 
-/* ------------------ DATA ------------------ */
+/* ------------------ ROSTER ------------------ */
 const defaultRoster = [
   "Ali Santiago","Anna Hutchinson","Austin Bartoszek","Brian Kloppe",
   "Casey Williams","Carter Nelson","Christian A. Johnston","Christie Walters",
@@ -172,7 +153,7 @@ const defaultRoster = [
 function load(key, fallback) {
     let x = JSON.parse(localStorage.getItem(key));
     if (!Array.isArray(x) || x.length === 0) {
-        localStorage.setItem(key, JSON.stringify(fallback));
+        localStorage.setItem(key, JSON.stringify([...fallback]));
         return [...fallback];
     }
     return x;
@@ -183,10 +164,7 @@ let safetyPool = load("safetyPool", names);
 let techPool = load("techPool", names);
 let chosenHistory = load("chosenHistory", []);
 
-/* ------------------ UTIL ------------------ */
-const initials = name => name.split(" ").map(n => n[0]).join("").toUpperCase();
-
-function saveState() {
+function save() {
     localStorage.setItem("names", JSON.stringify(names));
     localStorage.setItem("safetyPool", JSON.stringify(safetyPool));
     localStorage.setItem("techPool", JSON.stringify(techPool));
@@ -194,24 +172,70 @@ function saveState() {
 }
 
 /* ------------------ BUILD WHEEL ------------------ */
+function initials(name) {
+    return name.split(" ").map(w => w[0]).join("").toUpperCase();
+}
+
 function buildWheel(pool) {
     const wheel = document.getElementById("wheel");
     wheel.innerHTML = "";
-
     const angle = 360 / pool.length;
 
     for (let i = 0; i < pool.length; i++) {
         const div = document.createElement("div");
         div.className = "sliceLabel";
         div.textContent = initials(pool[i]);
-        div.style.transform = `rotate(${i * angle}deg) translate(0, -50%)`;
+        div.style.transform = `rotate(${i * angle}deg) translate(0,-50%)`;
         wheel.appendChild(div);
     }
+
+    wheel.style.background = `conic-gradient(
+        var(--accent1) 0 30deg,
+        var(--accent2) 30deg 60deg,
+        var(--accent1) 60deg 90deg,
+        var(--accent2) 90deg 120deg,
+        var(--accent1) 120deg 150deg,
+        var(--accent2) 150deg 180deg,
+        var(--accent1) 180deg 210deg,
+        var(--accent2) 210deg 240deg,
+        var(--accent1) 240deg 270deg,
+        var(--accent2) 270deg 300deg,
+        var(--accent1) 300deg 330deg,
+        var(--accent2) 330deg 360deg
+    )`;
+}
+
+/* ------------------ JS ANIMATION ENGINE ------------------ */
+let spinning = false;
+
+function animateRotation(targetDegrees, duration, callback) {
+    const wheel = document.getElementById("wheel");
+
+    let start = null;
+    let initial = 0;
+
+    function step(timestamp) {
+        if (!start) start = timestamp;
+
+        let progress = timestamp - start;
+        let percent = Math.min(progress / duration, 1);
+
+        let eased = 1 - Math.pow(1 - percent, 3);
+        let current = initial + eased * (targetDegrees - initial);
+
+        wheel.style.transform = `rotate(${current}deg)`;
+
+        if (percent < 1) {
+            requestAnimationFrame(step);
+        } else {
+            callback();
+        }
+    }
+
+    requestAnimationFrame(step);
 }
 
 /* ------------------ SPIN ------------------ */
-let spinning = false;
-
 function spin(type) {
     if (spinning) return;
     spinning = true;
@@ -221,50 +245,43 @@ function spin(type) {
 
     buildWheel(pool);
 
-    const wheel = document.getElementById("wheel");
     const angle = 360 / pool.length;
     const index = Math.floor(Math.random() * pool.length);
     const winner = pool[index];
 
-    wheel.style.transition = "none";
-    wheel.style.transform = "rotate(0.0001deg)";
-    wheel.offsetHeight;
+    const landingAngle = 360 * 15 + (360 - (index * angle + angle / 2));
 
-    const landing = 360 * 20 + (360 - (index * angle + angle / 2));
-    wheel.style.transition = "transform 6s cubic-bezier(.14,.78,.23,1)";
-    wheel.style.transform = `rotate(${landing}deg)`;
-
-    setTimeout(() => {
+    animateRotation(landingAngle, 6000, () => {
         spinning = false;
         pool.splice(index, 1);
         chosenHistory.unshift(winner);
-        saveState();
+        save();
 
-        document.getElementById("winnerBanner").textContent =
+        document.getElementById("winnerBanner").innerHTML =
             `🏆 Congratulations, ${winner}!`;
 
         updateLists();
-    }, 6100);
+    });
 }
 
 /* ------------------ LISTS ------------------ */
 function updateLists() {
     document.getElementById("remainingList").innerHTML =
-        names.map(n => `<div class='listItem'>${n}</div>`).join("");
+        names.map(n => `<div class="listItem">${n}</div>`).join("");
 
     document.getElementById("chosenList").innerHTML =
-        chosenHistory.map(n => `<div class='listItem'>✔ ${n}</div>`).join("");
+        chosenHistory.map(n => `<div class="listItem">✔ ${n}</div>`).join("");
 }
 
 /* ------------------ RESET ------------------ */
 function resetAll() {
-    if (!confirm("Reset ALL progress?")) return;
+    if (!confirm("Reset all progress?")) return;
     localStorage.clear();
     names = [...defaultRoster];
     safetyPool = [...defaultRoster];
     techPool = [...defaultRoster];
     chosenHistory = [];
-    saveState();
+    save();
     updateLists();
     buildWheel(names);
 }
@@ -276,3 +293,4 @@ updateLists();
 </script>
 </body>
 </html>
+
