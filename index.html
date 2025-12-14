@@ -3,143 +3,108 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Safety & Tech Share Wheel — Guaranteed Spin Version</title>
+<title>Safety & Tech Share Wheel</title>
 
 <style>
-:root {
-    --bg: #0b0f17;
-    --bg2: #141b29;
-    --accent1: #00eaff;
-    --accent2: #ff4da6;
-    --accent3: #8a2eff;
-    --glass: rgba(255,255,255,0.07);
-    --text: #e9ecf2;
-    --radius: 18px;
-}
-
 body {
-    margin: 0;
-    background: radial-gradient(circle at top, var(--bg2), var(--bg));
-    font-family: "Segoe UI", sans-serif;
-    color: var(--text);
-    height: 100vh;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-/* Winner Banner */
-#winnerBanner {
-    margin-top: 12px;
-    padding: 20px 30px;
-    background: linear-gradient(135deg, var(--accent1), var(--accent2));
-    border-radius: var(--radius);
-    font-size: 28px;
-    font-weight: bold;
-    min-height: 50px;
-    text-align: center;
-}
-
-/* Buttons */
-.controls { margin-top: 15px; display: flex; gap: 14px; }
-.btn {
-    padding: 12px 22px;
-    border-radius: var(--radius);
-    background: linear-gradient(135deg, var(--accent1), var(--accent3));
-    border: none;
-    cursor: pointer;
+    font-family: Arial, sans-serif;
+    background: #111;
     color: white;
-    font-size: 16px;
+    text-align: center;
+    margin: 0;
+    padding: 20px;
 }
-.reset-btn { background: linear-gradient(135deg, #ff3333, #ff0066); }
 
-/* Wheel + Pointer */
+#winnerBanner {
+    font-size: 24px;
+    margin: 20px;
+    padding: 15px;
+    background: #333;
+    border-radius: 10px;
+}
+
+button {
+    padding: 12px 20px;
+    margin: 10px;
+    background: #007bff;
+    border: none;
+    border-radius: 6px;
+    color: white;
+    cursor: pointer;
+}
+button:hover {
+    background: #0056b3;
+}
+
 #pointer {
-    width: 0; height: 0;
-    border-left: 25px solid transparent;
-    border-right: 25px solid transparent;
-    border-bottom: 45px solid var(--accent2);
+    width: 0;
+    height: 0;
+    border-left: 20px solid transparent;
+    border-right: 20px solid transparent;
+    border-bottom: 30px solid red;
     margin: 10px auto;
 }
 
 #wheel {
-    width: 420px;
-    height: 420px;
+    width: 350px;
+    height: 350px;
     border-radius: 50%;
-    border: 6px solid rgba(255,255,255,0.2);
-    background: black;
+    border: 6px solid #444;
+    margin: 20px auto;
     position: relative;
     overflow: hidden;
-    transform: rotate(0deg);
+    transition: transform 5s cubic-bezier(.17,.67,.12,1.02);
+    background: #222;
 }
 
 .sliceLabel {
     position: absolute;
-    left: 50%; top: 50%;
-    width: 48%;
+    left: 50%;
+    top: 50%;
+    width: 40%;
     transform-origin: 0% 50%;
-    text-align: right;
-    padding-right: 12px;
-    font-size: 18px;
-    font-weight: bold;
     color: white;
-}
-
-/* Panels */
-.sidePanelContainer {
-    position: absolute;
-    top: 100px;
-    width: 95%;
-    display: flex;
-    justify-content: space-between;
+    text-align: right;
+    font-size: 18px;
+    pointer-events: none;
 }
 
 .panel {
-    width: 200px;
-    height: 340px;
-    background: var(--glass);
-    border-radius: var(--radius);
-    padding: 12px;
-    overflow-y: auto;
+    width: 250px;
+    margin: 20px auto;
+    padding: 15px;
+    background: #222;
+    border-radius: 10px;
 }
-
-.listItem {
-    padding: 8px;
-    margin-bottom: 6px;
-    background: rgba(255,255,255,0.12);
-    border-radius: var(--radius);
-}
+.listItem { padding: 6px; }
 </style>
 </head>
 
 <body>
 
-<div id="winnerBanner">Spin the Wheel!</div>
+<h1>Safety & Tech Share Wheel</h1>
 
-<div class="controls">
-    <button class="btn" onclick="spin('safety')">Spin Safety</button>
-    <button class="btn" onclick="spin('tech')">Spin Tech</button>
-    <button class="btn reset-btn" onclick="resetAll()">Reset</button>
-</div>
+<div id="winnerBanner">Spin the wheel!</div>
+
+<button onclick="spin('safety')">Spin Safety</button>
+<button onclick="spin('tech')">Spin Tech</button>
+<button onclick="resetAll()" style="background:#ff4444;">Reset</button>
 
 <div id="pointer"></div>
 <div id="wheel"></div>
 
-<div class="sidePanelContainer">
-    <div class="panel">
-        <h3>Remaining</h3>
-        <div id="remainingList"></div>
-    </div>
-    <div class="panel">
-        <h3>Selected</h3>
-        <div id="chosenList"></div>
-    </div>
+<div class="panel">
+    <h3>Remaining People</h3>
+    <div id="remainingList"></div>
+</div>
+
+<div class="panel">
+    <h3>Chosen</h3>
+    <div id="chosenList"></div>
 </div>
 
 <script>
-
-/* ------------------ ROSTER ------------------ */
+/* ------------ DATA ---------------- */
 const defaultRoster = [
   "Ali Santiago","Anna Hutchinson","Austin Bartoszek","Brian Kloppe",
   "Casey Williams","Carter Nelson","Christian A. Johnston","Christie Walters",
@@ -152,11 +117,7 @@ const defaultRoster = [
 
 function load(key, fallback) {
     let x = JSON.parse(localStorage.getItem(key));
-    if (!Array.isArray(x) || x.length === 0) {
-        localStorage.setItem(key, JSON.stringify([...fallback]));
-        return [...fallback];
-    }
-    return x;
+    return Array.isArray(x) && x.length ? x : [...fallback];
 }
 
 let names = load("names", defaultRoster);
@@ -171,9 +132,9 @@ function save() {
     localStorage.setItem("chosenHistory", JSON.stringify(chosenHistory));
 }
 
-/* ------------------ BUILD WHEEL ------------------ */
+/* ------------ WHEEL BUILD ---------------- */
 function initials(name) {
-    return name.split(" ").map(w => w[0]).join("").toUpperCase();
+    return name.split(" ").map(x => x[0]).join("").toUpperCase();
 }
 
 function buildWheel(pool) {
@@ -185,95 +146,59 @@ function buildWheel(pool) {
         const div = document.createElement("div");
         div.className = "sliceLabel";
         div.textContent = initials(pool[i]);
-        div.style.transform = `rotate(${i * angle}deg) translate(0,-50%)`;
+        div.style.transform = `rotate(${angle * i}deg) translate(0, -50%)`;
         wheel.appendChild(div);
     }
-
-    wheel.style.background = `conic-gradient(
-        var(--accent1) 0 30deg,
-        var(--accent2) 30deg 60deg,
-        var(--accent1) 60deg 90deg,
-        var(--accent2) 90deg 120deg,
-        var(--accent1) 120deg 150deg,
-        var(--accent2) 150deg 180deg,
-        var(--accent1) 180deg 210deg,
-        var(--accent2) 210deg 240deg,
-        var(--accent1) 240deg 270deg,
-        var(--accent2) 270deg 300deg,
-        var(--accent1) 300deg 330deg,
-        var(--accent2) 330deg 360deg
-    )`;
 }
 
-/* ------------------ JS ANIMATION ENGINE ------------------ */
+/* ------------ SPIN (WORKING) ---------------- */
 let spinning = false;
 
-function animateRotation(targetDegrees, duration, callback) {
-    const wheel = document.getElementById("wheel");
-
-    let start = null;
-    let initial = 0;
-
-    function step(timestamp) {
-        if (!start) start = timestamp;
-
-        let progress = timestamp - start;
-        let percent = Math.min(progress / duration, 1);
-
-        let eased = 1 - Math.pow(1 - percent, 3);
-        let current = initial + eased * (targetDegrees - initial);
-
-        wheel.style.transform = `rotate(${current}deg)`;
-
-        if (percent < 1) {
-            requestAnimationFrame(step);
-        } else {
-            callback();
-        }
-    }
-
-    requestAnimationFrame(step);
-}
-
-/* ------------------ SPIN ------------------ */
 function spin(type) {
     if (spinning) return;
     spinning = true;
 
     let pool = type === "safety" ? safetyPool : techPool;
-    if (pool.length === 0) pool = type === "safety" ? (safetyPool = [...names]) : (techPool = [...names]);
+    if (pool.length === 0) pool = type === "safety" ? (safetyPool=[...names]) : (techPool=[...names]);
 
     buildWheel(pool);
 
+    const wheel = document.getElementById("wheel");
     const angle = 360 / pool.length;
     const index = Math.floor(Math.random() * pool.length);
     const winner = pool[index];
 
-    const landingAngle = 360 * 15 + (360 - (index * angle + angle / 2));
+    // RESET FIRST so animation always triggers
+    wheel.style.transition = "none";
+    wheel.style.transform = "rotate(0deg)";
+    wheel.offsetHeight; // force reflow
 
-    animateRotation(landingAngle, 6000, () => {
+    // THEN apply spin
+    const finalAngle = 360 * 10 + (360 - (index * angle + angle / 2));
+    wheel.style.transition = "transform 5s cubic-bezier(.17,.67,.12,1.02)";
+    wheel.style.transform = `rotate(${finalAngle}deg)`;
+
+    setTimeout(() => {
         spinning = false;
         pool.splice(index, 1);
         chosenHistory.unshift(winner);
         save();
-
-        document.getElementById("winnerBanner").innerHTML =
-            `🏆 Congratulations, ${winner}!`;
-
+        document.getElementById("winnerBanner").textContent =
+            "🏆 Congratulations, " + winner + "!";
         updateLists();
-    });
+    }, 5100);
 }
 
-/* ------------------ LISTS ------------------ */
+/* ------------ UI UPDATES ---------------- */
 function updateLists() {
     document.getElementById("remainingList").innerHTML =
-        names.map(n => `<div class="listItem">${n}</div>`).join("");
+        names.map(n => `<div class='listItem'>${n}</div>`).join("");
 
     document.getElementById("chosenList").innerHTML =
-        chosenHistory.map(n => `<div class="listItem">✔ ${n}</div>`).join("");
+        chosenHistory.map(n => `<div class='listItem'>✔ ${n}</div>`).join("");
 }
 
-/* ------------------ RESET ------------------ */
+/* ------------ RESET ---------------- */
 function resetAll() {
     if (!confirm("Reset all progress?")) return;
     localStorage.clear();
@@ -282,15 +207,15 @@ function resetAll() {
     techPool = [...defaultRoster];
     chosenHistory = [];
     save();
-    updateLists();
     buildWheel(names);
+    updateLists();
 }
 
-/* ------------------ INIT ------------------ */
+/* ------------ INIT ---------------- */
 buildWheel(names);
 updateLists();
 
 </script>
+
 </body>
 </html>
-
