@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Safety & Tech Share Wheel — Clean No-Arrow Edition</title>
+<title>Safety & Tech Share Wheel — Dual Mode</title>
 
 <style>
 body {
@@ -38,14 +38,32 @@ body {
     transition: transform .3s ease;
 }
 
-/* LEFT / RIGHT PANELS */
+button {
+    padding: 12px 20px;
+    margin: 5px;
+    background: #007bff;
+    border: none;
+    border-radius: 6px;
+    color: white;
+    cursor: pointer;
+    font-size: 16px;
+}
+button:hover { background: #0056b3; }
+.reset-btn { background: #ff4444; }
+
+/* SIDE PANELS */
 #leftPanel, #rightPanel {
     background: #1a1a1a;
     padding: 10px;
     overflow-y: auto;
 }
+
 #leftPanel { grid-area: left; border-right: 2px solid #333; }
 #rightPanel { grid-area: right; border-left: 2px solid #333; }
+
+.panelSection {
+    margin-bottom: 20px;
+}
 
 .panelTitle {
     font-size: 20px;
@@ -90,29 +108,16 @@ body {
     position: absolute;
     left: 50%;
     top: 50%;
-    width: 43%;
+    width: 45%;
     transform-origin: 0% 50%;
     font-size: 18px;
+    font-weight: bold;
     text-align: right;
     pointer-events: none;
     color: white;
 }
 
-/* Buttons */
-button {
-    padding: 12px 20px;
-    margin: 5px;
-    border-radius: 6px;
-    background: #007bff;
-    border: none;
-    color: white;
-    cursor: pointer;
-    font-size: 16px;
-}
-button:hover { background: #0056b3; }
-.reset-btn { background: #ff4444; }
-
-/* Confetti */
+/* CONFETTI */
 .confetti {
     position: fixed;
     width: 12px;
@@ -141,8 +146,15 @@ button:hover { background: #0056b3; }
 
 <!-- LEFT PANEL -->
 <div id="leftPanel">
-    <div class="panelTitle">Remaining</div>
-    <div id="remainingList"></div>
+    <div class="panelSection">
+        <div class="panelTitle">Remaining Safety</div>
+        <div id="remainingSafety"></div>
+    </div>
+
+    <div class="panelSection">
+        <div class="panelTitle">Remaining Tech</div>
+        <div id="remainingTech"></div>
+    </div>
 </div>
 
 <!-- WHEEL -->
@@ -152,8 +164,15 @@ button:hover { background: #0056b3; }
 
 <!-- RIGHT PANEL -->
 <div id="rightPanel">
-    <div class="panelTitle">Selected</div>
-    <div id="chosenList"></div>
+    <div class="panelSection">
+        <div class="panelTitle">Selected Safety</div>
+        <div id="chosenSafetyList"></div>
+    </div>
+
+    <div class="panelSection">
+        <div class="panelTitle">Selected Tech</div>
+        <div id="chosenTechList"></div>
+    </div>
 </div>
 
 <script>
@@ -170,37 +189,39 @@ const defaultRoster = [
 ];
 
 function load(key, fallback) {
-    let d = JSON.parse(localStorage.getItem(key));
-    return Array.isArray(d) && d.length ? d : [...fallback];
+    let x = JSON.parse(localStorage.getItem(key));
+    return Array.isArray(x) && x.length ? x : [...fallback];
 }
 
-let names = load("names", defaultRoster);
-let safetyPool = load("safetyPool", names);
-let techPool = load("techPool", names);
-let chosenHistory = load("chosenHistory", []);
+/* Independent pools */
+let safetyPool = load("safetyPool", defaultRoster);
+let techPool   = load("techPool", defaultRoster);
+
+/* Independent chosen lists */
+let chosenSafety = load("chosenSafety", []);
+let chosenTech   = load("chosenTech", []);
 
 function save() {
-    localStorage.setItem("names", JSON.stringify(names));
     localStorage.setItem("safetyPool", JSON.stringify(safetyPool));
     localStorage.setItem("techPool", JSON.stringify(techPool));
-    localStorage.setItem("chosenHistory", JSON.stringify(chosenHistory));
+    localStorage.setItem("chosenSafety", JSON.stringify(chosenSafety));
+    localStorage.setItem("chosenTech", JSON.stringify(chosenTech));
 }
 
-/* ------------------ INITIALS ------------------ */
+/* ------------------ WHEEL ------------------ */
 const initials = name => name.split(" ").map(w => w[0]).join("").toUpperCase();
 
-/* ------------------ BUILD WHEEL ------------------ */
 function buildWheel(pool) {
     const wheel = document.getElementById("wheel");
     wheel.innerHTML = "";
     const angle = 360 / pool.length;
 
     for (let i = 0; i < pool.length; i++) {
-        const label = document.createElement("div");
-        label.className = "sliceLabel";
-        label.textContent = initials(pool[i]);
-        label.style.transform = `rotate(${i * angle}deg) translate(0,-50%)`;
-        wheel.appendChild(label);
+        const div = document.createElement("div");
+        div.className = "sliceLabel";
+        div.textContent = initials(pool[i]);
+        div.style.transform = `rotate(${i * angle}deg) translate(0,-50%)`;
+        wheel.appendChild(div);
     }
 }
 
@@ -210,14 +231,14 @@ function confetti() {
         const c = document.createElement("div");
         c.className = "confetti";
         c.style.left = Math.random()*100 + "vw";
-        c.style.background = ["#ff4da6","#00eaff","#8a2eff","#ffdd00"]
-            [Math.floor(Math.random()*4)];
+        c.style.background =
+            ["#ff4da6","#00eaff","#8a2eff","#ffdd00"][Math.floor(Math.random()*4)];
         document.body.appendChild(c);
         setTimeout(() => c.remove(), 3000);
     }
 }
 
-/* ------------------ SPIN (NO POINTER VERSION) ------------------ */
+/* ------------------ SPIN ------------------ */
 let spinning = false;
 
 function spin(type) {
@@ -225,8 +246,9 @@ function spin(type) {
     spinning = true;
 
     let pool = type === "safety" ? safetyPool : techPool;
+
     if (pool.length === 0)
-        pool = type === "safety" ? (safetyPool = [...names]) : (techPool = [...names]);
+        pool = type === "safety" ? (safetyPool=[...defaultRoster]) : (techPool=[...defaultRoster]);
 
     buildWheel(pool);
 
@@ -235,22 +257,15 @@ function spin(type) {
     const index = Math.floor(Math.random() * pool.length);
     const winner = pool[index];
 
-    // Reset rotation
+    /* Reset wheel */
     wheel.style.transition = "none";
     wheel.style.transform = "rotate(0deg)";
     wheel.offsetHeight;
 
-    /* 
-      ALIGNMENT FIX:
-      We want the winner's slice to end facing RIGHT (0 degrees visually).
-      That means the wheel must rotate the negative of that slice's center.
-    */
+    /* Stop with winner facing RIGHT */
     let landingAngle = -(index * sliceAngle + sliceAngle/2);
-
-    // Normalize and add spins
     landingAngle = ((landingAngle % 360) + 360) + 360 * 10;
 
-    // Spin
     wheel.style.transition = "transform 5s cubic-bezier(.17,.67,.12,1.02)";
     wheel.style.transform = `rotate(${landingAngle}deg)`;
 
@@ -258,44 +273,55 @@ function spin(type) {
         spinning = false;
 
         pool.splice(index, 1);
-        chosenHistory.unshift(winner);
+
+        if (type === "safety") chosenSafety.unshift(winner);
+        else                  chosenTech.unshift(winner);
+
         save();
 
         const banner = document.getElementById("winnerBanner");
         banner.innerHTML = `🎉🏆 Congratulations, <strong>${winner}</strong>!`;
         banner.style.transform = "scale(1.2)";
-        setTimeout(()=>banner.style.transform="scale(1)", 300);
+        setTimeout(() => banner.style.transform = "scale(1)", 300);
 
         confetti();
         updateLists();
+
     }, 5050);
 }
 
-/* ------------------ UPDATE LISTS ------------------ */
+/* ------------------ LISTS ------------------ */
 function updateLists() {
-    document.getElementById("remainingList").innerHTML =
-        names.map(n=>`<div class='listItem'>${n}</div>`).join("");
+    document.getElementById("remainingSafety").innerHTML =
+        safetyPool.map(n=>`<div class='listItem'>${n}</div>`).join("");
 
-    document.getElementById("chosenList").innerHTML =
-        chosenHistory.map(n=>`<div class='listItem'>✔ ${n}</div>`).join("");
+    document.getElementById("remainingTech").innerHTML =
+        techPool.map(n=>`<div class='listItem'>${n}</div>`).join("");
+
+    document.getElementById("chosenSafetyList").innerHTML =
+        chosenSafety.map(n=>`<div class='listItem'>✔ ${n}</div>`).join("");
+
+    document.getElementById("chosenTechList").innerHTML =
+        chosenTech.map(n=>`<div class='listItem'>✔ ${n}</div>`).join("");
 }
 
 /* ------------------ RESET ------------------ */
 function resetAll() {
-    if (!confirm("Reset all progress?")) return;
+    if (!confirm("Reset ALL progress?")) return;
+
     localStorage.clear();
-    names=[...defaultRoster];
-    safetyPool=[...defaultRoster];
-    techPool=[...defaultRoster];
-    chosenHistory=[];
+    safetyPool = [...defaultRoster];
+    techPool   = [...defaultRoster];
+    chosenSafety = [];
+    chosenTech   = [];
     save();
-    buildWheel(names);
     updateLists();
-    document.getElementById("winnerBanner").textContent="Progress Reset.";
+    buildWheel(defaultRoster);
+    document.getElementById("winnerBanner").textContent = "Progress Reset.";
 }
 
 /* ------------------ INIT ------------------ */
-buildWheel(names);
+buildWheel(defaultRoster);
 updateLists();
 
 </script>
