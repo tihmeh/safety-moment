@@ -1,14 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Safety & Tech Share Wheel — Elite Edition</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Safety & Tech Share Wheel — Fixed Edition</title>
 
 <style>
-/* -----------------------------------------------------------
-   GLOBAL THEME — cinematic glass, neons, depth, gradients
------------------------------------------------------------ */
 :root {
     --bg: #0b0f17;
     --bg2: #141b29;
@@ -32,12 +29,9 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    perspective: 2000px;
 }
 
-/* -----------------------------------------------------------
-   WINNER BANNER
------------------------------------------------------------ */
+/* WINNER BANNER */
 #winnerBanner {
     margin-top: 12px;
     padding: 20px 30px;
@@ -52,13 +46,9 @@ body {
     align-items: center;
     justify-content: center;
     letter-spacing: 1.5px;
-    text-shadow: 0 0 20px rgba(255,255,255,0.5);
-    border: 2px solid rgba(255,255,255,0.25);
 }
 
-/* -----------------------------------------------------------
-   BUTTON CONTROLS
------------------------------------------------------------ */
+/* BUTTONS */
 .controls {
     margin-top: 15px;
     display: flex;
@@ -76,8 +66,6 @@ body {
     letter-spacing: 0.7px;
     transition: all 0.25s ease;
     box-shadow: 0 0 12px rgba(0,0,0,0.3);
-    border: 1px solid var(--glass-border);
-    transform: translateZ(0);
 }
 
 .btn:hover {
@@ -93,14 +81,7 @@ body {
     box-shadow: 0 0 22px #ff3b3b;
 }
 
-/* -----------------------------------------------------------
-   WHEEL CONTAINER
------------------------------------------------------------ */
-#wheelContainer {
-    margin-top: 30px;
-    transform-style: preserve-3d;
-}
-
+/* POINTER */
 #pointer {
     width: 0;
     height: 0;
@@ -116,22 +97,19 @@ body {
     to { transform: translateY(-6px); }
 }
 
-/* -----------------------------------------------------------
-   WHEEL — 3D, glass, neon
------------------------------------------------------------ */
+/* WHEEL */
 #wheel {
     width: 460px;
     height: 460px;
     border-radius: 50%;
     position: relative;
-    box-shadow: var(--shadow);
-    overflow: hidden;
     border: 6px solid rgba(255,255,255,0.15);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    background: black;
     transition: transform 6s cubic-bezier(.14,.78,.23,1);
-    background: #000;
 }
 
-/* TEXT LABELS */
 .sliceLabel {
     position: absolute;
     left: 50%;
@@ -147,9 +125,7 @@ body {
     text-shadow: 0 0 8px black;
 }
 
-/* -----------------------------------------------------------
-   SIDE PANELS — redesigned card layout
------------------------------------------------------------ */
+/* PANELS */
 .sidePanelContainer {
     position: absolute;
     top: 95px;
@@ -172,33 +148,21 @@ body {
     font-size: 15px;
 }
 
-.panel h3 {
-    margin: 5px 0 10px;
-    text-align: center;
-    font-size: 18px;
-    letter-spacing: 1px;
-}
-
 .listItem {
     padding: 8px;
     margin-bottom: 6px;
     background: rgba(255,255,255,0.08);
     border-radius: var(--radius);
-    font-size: 14px;
 }
 
-/* -----------------------------------------------------------
-   CONFETTI EFFECT
------------------------------------------------------------ */
+/* CONFETTI */
 .confetti {
     position: fixed;
     width: 12px;
     height: 12px;
-    background: red;
     top: -10px;
-    animation: fall 2.5s linear forwards;
     opacity: 0.9;
-    z-index: 99999;
+    animation: fall 2.5s linear forwards;
 }
 @keyframes fall {
     to { transform: translateY(110vh) rotate(720deg); }
@@ -209,7 +173,6 @@ body {
 
 <body>
 
-<!-- WINNER BANNER -->
 <div id="winnerBanner">Spin the Wheel!</div>
 
 <!-- BUTTONS -->
@@ -220,18 +183,17 @@ body {
 </div>
 
 <!-- WHEEL -->
-<div id="wheelContainer">
+<div>
     <div id="pointer"></div>
     <div id="wheel"></div>
 </div>
 
-<!-- SIDE PANELS -->
+<!-- PANELS -->
 <div class="sidePanelContainer">
     <div class="panel">
         <h3>Remaining</h3>
         <div id="remainingList"></div>
     </div>
-
     <div class="panel">
         <h3>Selected</h3>
         <div id="chosenList"></div>
@@ -240,22 +202,20 @@ body {
 
 <script>
 
-/* -----------------------------------------------------------
-   MASTER ROSTER
------------------------------------------------------------ */
+/* ---------------------------------------------
+   DEFAULT TEAM LIST
+--------------------------------------------- */
 const defaultRoster = [
-    "Ali Santiago","Anna Hutchinson","Austin Bartoszek","Brian Kloppe",
-    "Casey Williams","Carter Nelson","Christian A. Johnston","Christie Walters",
-    "Daniel Taggart","Emiliano Garcia","Frank Bottiglieri","Grace Frigaard",
-    "Greg Waters","Ian Manhoo","Jim Pesek","Julissa Vergara",
-    "Kevin Ferm","Kyle Young","Mark Besser","Patrick McCarron",
-    "Rey Rodriguez","Richard Fredette","Shaun Thomas","Shane Bowen",
-    "Stacie Gray","Steve Lauer","Timothy Costello"
+  "Ali Santiago","Anna Hutchinson","Austin Bartoszek","Brian Kloppe",
+  "Casey Williams","Carter Nelson","Christian A. Johnston","Christie Walters",
+  "Daniel Taggart","Emiliano Garcia","Frank Bottiglieri","Grace Frigaard",
+  "Greg Waters","Ian Manhoo","Jim Pesek","Julissa Vergara",
+  "Kevin Ferm","Kyle Young","Mark Besser","Patrick McCarron",
+  "Rey Rodriguez","Richard Fredette","Shaun Thomas","Shane Bowen",
+  "Stacie Gray","Steve Lauer","Timothy Costello"
 ];
 
-/* -----------------------------------------------------------
-   LOAD / REPAIR STORAGE
------------------------------------------------------------ */
+/* -------- SAFE LOADER (fixes corrupted or empty storage) -------- */
 function loadPool(key, fallback) {
     let saved = JSON.parse(localStorage.getItem(key));
     if (!Array.isArray(saved) || saved.length === 0) {
@@ -270,7 +230,7 @@ let safetyPool = loadPool("safetyPool", names);
 let techPool = loadPool("techPool", names);
 let chosenHistory = loadPool("chosenHistory", []);
 
-/* SAVE */
+/* SAVE STATE */
 function saveState() {
     localStorage.setItem("names", JSON.stringify(names));
     localStorage.setItem("safetyPool", JSON.stringify(safetyPool));
@@ -278,22 +238,19 @@ function saveState() {
     localStorage.setItem("chosenHistory", JSON.stringify(chosenHistory));
 }
 
-/* -----------------------------------------------------------
-   UTILITIES
------------------------------------------------------------ */
-const initials = name =>
-    name.split(" ").map(w => w[0]).join("").toUpperCase();
+/* ---------------------------------------------
+   GET INITIALS
+--------------------------------------------- */
+const initials = name => name.split(" ").map(w => w[0]).join("").toUpperCase();
 
-/* -----------------------------------------------------------
-   BUILD WHEEL (slices + labels)
------------------------------------------------------------ */
+/* ---------------------------------------------
+   BUILD WHEEL (dynamic slices)
+--------------------------------------------- */
 function buildWheel(list) {
     const wheel = document.getElementById("wheel");
     wheel.innerHTML = "";
-
     const sliceAngle = 360 / list.length;
 
-    // Build alternating slice colors
     let gradient = [];
     for (let i = 0; i < list.length; i++) {
         const start = i * sliceAngle;
@@ -307,30 +264,30 @@ function buildWheel(list) {
     list.forEach((name, i) => {
         const label = document.createElement("div");
         label.className = "sliceLabel";
-        label.style.transform = `rotate(${sliceAngle * i}deg) translate(0,-50%)`;
+        label.style.transform = `rotate(${i * sliceAngle}deg) translate(0,-50%)`;
         label.textContent = initials(name);
         wheel.appendChild(label);
     });
 }
 
-/* -----------------------------------------------------------
-   CONFETTI ON WIN
------------------------------------------------------------ */
+/* ---------------------------------------------
+   CONFETTI
+--------------------------------------------- */
 function launchConfetti() {
-    for (let i = 0; i < 60; i++) {
+    for (let i = 0; i < 50; i++) {
         const c = document.createElement("div");
         c.className = "confetti";
         c.style.left = Math.random() * 100 + "vw";
         c.style.background = ["#ff4da6","#00eaff","#8a2eff","#ffdd00"][Math.floor(Math.random()*4)];
-        c.style.animationDuration = (1.8 + Math.random()*1.8) + "s";
+        c.style.animationDuration = (1.5 + Math.random()*2) + "s";
         document.body.appendChild(c);
         setTimeout(() => c.remove(), 3000);
     }
 }
 
-/* -----------------------------------------------------------
-   SPIN FUNCTION
------------------------------------------------------------ */
+/* ---------------------------------------------
+   SPIN FUNCTION — **UNBREAKABLE VERSION**
+--------------------------------------------- */
 let spinning = false;
 
 function spin(type) {
@@ -347,9 +304,19 @@ function spin(type) {
     const index = Math.floor(Math.random() * pool.length);
     const winner = pool[index];
 
-    const landingRotation = 360 * 14 + (360 - (index * sliceAngle + sliceAngle / 2));
-    wheel.style.transform = `rotate(${landingRotation}deg)`;
+    /* --- This patch guarantees spin ALWAYS works --- */
 
+    wheel.style.transition = "none";
+    wheel.style.transform = "rotate(0deg)";
+    void wheel.offsetWidth; // force layout
+
+    requestAnimationFrame(() => {
+        wheel.style.transition = "transform 6s cubic-bezier(.14,.78,.23,1)";
+        const landing = 360 * 15 + (360 - (index * sliceAngle + sliceAngle / 2));
+        wheel.style.transform = `rotate(${landing}deg)`;
+    });
+
+    /* AFTER SPIN */
     setTimeout(() => {
         spinning = false;
 
@@ -357,16 +324,18 @@ function spin(type) {
         chosenHistory.unshift(winner);
         saveState();
 
-        document.getElementById("winnerBanner").innerHTML = `🏆 Congratulations, ${winner}!`;
+        document.getElementById("winnerBanner").textContent =
+            `🏆 Congratulations, ${winner}!`;
 
         updateLists();
         launchConfetti();
-    }, 6000);
+
+    }, 6050);
 }
 
-/* -----------------------------------------------------------
-   LIST RENDERING
------------------------------------------------------------ */
+/* ---------------------------------------------
+   UPDATE LIST PANELS
+--------------------------------------------- */
 function updateLists() {
     document.getElementById("remainingList").innerHTML =
         names.map(n => `<div class='listItem'>${n}</div>`).join("");
@@ -375,11 +344,11 @@ function updateLists() {
         chosenHistory.map(n => `<div class='listItem'>✔ ${n}</div>`).join("");
 }
 
-/* -----------------------------------------------------------
-   RESET
------------------------------------------------------------ */
+/* ---------------------------------------------
+   RESET FUNCTION
+--------------------------------------------- */
 function resetAll() {
-    if (!confirm("Are you sure you want to reset ALL progress?")) return;
+    if (!confirm("Reset ALL progress?")) return;
 
     localStorage.clear();
     names = [...defaultRoster];
@@ -388,19 +357,18 @@ function resetAll() {
     chosenHistory = [];
 
     saveState();
-    updateLists();
     buildWheel(names);
-
-    document.getElementById("winnerBanner").innerHTML = "Progress Reset.";
+    updateLists();
+    document.getElementById("winnerBanner").innerText = "Progress Reset.";
 }
 
-/* -----------------------------------------------------------
+/* ---------------------------------------------
    INIT
------------------------------------------------------------ */
+--------------------------------------------- */
 buildWheel(names);
 updateLists();
 
 </script>
-
 </body>
 </html>
+
