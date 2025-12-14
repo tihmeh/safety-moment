@@ -62,6 +62,7 @@ body {
   font-size: 15px;
   transition: 0.25s;
 }
+
 .btn:hover {
   transform: scale(1.05);
 }
@@ -85,6 +86,7 @@ body {
   margin: 0 auto;
   animation: pulse 1s infinite alternate;
 }
+
 @keyframes pulse {
   from { transform: translateY(0); }
   to { transform: translateY(-4px); }
@@ -102,7 +104,6 @@ body {
   box-shadow: 0 0 25px rgba(0,0,0,0.5);
 }
 
-/* Labels inside slices */
 .sliceLabel {
   position: absolute;
   left: 50%;
@@ -149,6 +150,7 @@ body {
   background: rgba(255,255,255,0.07);
   border-radius: var(--radius);
 }
+
 </style>
 </head>
 
@@ -181,7 +183,7 @@ body {
 
 <script>
 
-/* ----------- INITIAL DATA ----------- */
+/* ---------- DEFAULT ROSTER ---------- */
 const defaultRoster = [
   "Ali Santiago","Anna Hutchinson","Austin Bartoszek","Brian Kloppe",
   "Casey Williams","Carter Nelson","Christian A. Johnston","Christie Walters",
@@ -192,11 +194,24 @@ const defaultRoster = [
   "Stacie Gray","Steve Lauer","Timothy Costello"
 ];
 
-let names = JSON.parse(localStorage.getItem("names")) || [...defaultRoster];
-let safetyPool = JSON.parse(localStorage.getItem("safetyPool")) || [...names];
-let techPool = JSON.parse(localStorage.getItem("techPool")) || [...names];
-let chosenHistory = JSON.parse(localStorage.getItem("chosenHistory")) || [];
+/* ---------- SAFE LOADING FUNCTION ---------- */
+function loadPool(key, fallback) {
+  let saved = JSON.parse(localStorage.getItem(key));
 
+  if (!Array.isArray(saved) || saved.length === 0) {
+    localStorage.setItem(key, JSON.stringify([...fallback]));
+    return [...fallback];
+  }
+  return saved;
+}
+
+/* ---------- LOAD POOLS SAFELY ---------- */
+let names = loadPool("names", defaultRoster);
+let safetyPool = loadPool("safetyPool", names);
+let techPool = loadPool("techPool", names);
+let chosenHistory = loadPool("chosenHistory", []);
+
+/* ---------- SAVE ---------- */
 function save() {
   localStorage.setItem("names", JSON.stringify(names));
   localStorage.setItem("safetyPool", JSON.stringify(safetyPool));
@@ -204,30 +219,28 @@ function save() {
   localStorage.setItem("chosenHistory", JSON.stringify(chosenHistory));
 }
 
-/* ----------- INITIALS ----------- */
+/* ---------- INITIALS ---------- */
 function getInitials(name) {
   return name.split(" ").map(w => w[0]).join("").toUpperCase();
 }
 
-/* ----------- BUILD REAL SLICES ----------- */
+/* ---------- DRAW WHEEL ---------- */
 function buildWheel(list) {
   const wheel = document.getElementById("wheel");
   wheel.innerHTML = "";
 
   const sliceAngle = 360 / list.length;
-
-  // build alternating-color conic gradient pattern
   let gradientParts = [];
-  for (let i = 0; i < list.length; i++) {
+
+  list.forEach((name, i) => {
     const start = i * sliceAngle;
     const end = start + sliceAngle;
     const color = i % 2 === 0 ? "var(--accent)" : "var(--accent2)";
     gradientParts.push(`${color} ${start}deg ${end}deg`);
-  }
+  });
 
   wheel.style.background = `conic-gradient(${gradientParts.join(",")})`;
 
-  // labels
   list.forEach((name, i) => {
     const label = document.createElement("div");
     label.className = "sliceLabel";
@@ -237,7 +250,7 @@ function buildWheel(list) {
   });
 }
 
-/* ----------- SPIN LOGIC ----------- */
+/* ---------- SPIN FUNCTION ---------- */
 let spinning = false;
 
 function startSpin(type) {
@@ -260,15 +273,17 @@ function startSpin(type) {
 
   setTimeout(() => {
     spinning = false;
+
     pool.splice(index, 1);
     chosenHistory.unshift(winner);
     save();
+
     document.getElementById("winnerBanner").innerHTML = `🏆 Congratulations, ${winner}!`;
     updateLists();
   }, 6000);
 }
 
-/* ----------- UPDATE LISTS ----------- */
+/* ---------- UPDATE LISTS ---------- */
 function updateLists() {
   document.getElementById("remainingList").innerHTML =
     names.map(n => `<div class='listItem'>${n}</div>`).join("");
@@ -277,7 +292,7 @@ function updateLists() {
     chosenHistory.map(n => `<div class='listItem'>✔ ${n}</div>`).join("");
 }
 
-/* ----------- RESET ----------- */
+/* ---------- RESET ---------- */
 function confirmReset() {
   if (!confirm("Reset ALL progress?")) return;
 
@@ -292,7 +307,7 @@ function confirmReset() {
   document.getElementById("winnerBanner").textContent = "Progress Reset.";
 }
 
-/* ----------- INIT ----------- */
+/* ---------- INIT ---------- */
 buildWheel(names);
 updateLists();
 
@@ -300,3 +315,4 @@ updateLists();
 
 </body>
 </html>
+
