@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Safety & Tech Share Wheel — Right Pointer Edition</title>
+<title>Safety & Tech Share Wheel — Pointer Aligned</title>
 
 <style>
 body {
@@ -44,11 +44,14 @@ body {
     padding: 10px;
     overflow-y: auto;
 }
-
 #leftPanel { grid-area: left; border-right: 2px solid #333; }
 #rightPanel { grid-area: right; border-left: 2px solid #333; }
 
-.panelTitle { text-align: center; font-size: 20px; margin-bottom: 10px; }
+.panelTitle {
+    font-size: 20px;
+    margin-bottom: 10px;
+    text-align: center;
+}
 
 .listItem {
     padding: 6px;
@@ -63,24 +66,25 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
+    position: relative;
 }
 
-/* Pointer on RIGHT side */
+#wheelWrapper {
+    position: relative;
+}
+
+/* RIGHT SIDE POINTER */
 #pointer {
     position: absolute;
-    right: -10px;
+    right: -20px;
     top: 50%;
     transform: translateY(-50%);
     width: 0;
     height: 0;
     border-top: 20px solid transparent;
     border-bottom: 20px solid transparent;
-    border-left: 30px solid red;
+    border-left: 35px solid red;
     z-index: 10;
-}
-
-#wheelWrapper {
-    position: relative;
 }
 
 #wheel {
@@ -105,12 +109,12 @@ body {
     position: absolute;
     left: 50%;
     top: 50%;
-    width: 48%;
+    width: 43%;
     transform-origin: 0% 50%;
     font-size: 18px;
-    font-weight: bold;
     text-align: right;
     pointer-events: none;
+    color: white;
 }
 
 /* Buttons */
@@ -134,7 +138,7 @@ button:hover { background: #0056b3; }
     top: -10px;
     opacity: 0.9;
     animation: confettiFall 2.5s linear forwards;
-    z-index: 9999;
+    z-index: 999999;
 }
 @keyframes confettiFall {
     to { transform: translateY(110vh) rotate(720deg); }
@@ -159,7 +163,7 @@ button:hover { background: #0056b3; }
     <div id="remainingList"></div>
 </div>
 
-<!-- WHEEL -->
+<!-- WHEEL AREA -->
 <div id="wheelArea">
     <div id="wheelWrapper">
         <div id="pointer"></div>
@@ -175,7 +179,7 @@ button:hover { background: #0056b3; }
 
 <script>
 
-/* ------------ DATA ---------------- */
+/* ------------ DATA ------------ */
 const defaultRoster = [
   "Ali Santiago","Anna Hutchinson","Austin Bartoszek","Brian Kloppe",
   "Casey Williams","Carter Nelson","Christian A. Johnston","Christie Walters",
@@ -187,8 +191,8 @@ const defaultRoster = [
 ];
 
 function load(key, fallback) {
-    let data = JSON.parse(localStorage.getItem(key));
-    return Array.isArray(data) && data.length ? data : [...fallback];
+    let x = JSON.parse(localStorage.getItem(key));
+    return Array.isArray(x) && x.length ? x : [...fallback];
 }
 
 let names = load("names", defaultRoster);
@@ -203,20 +207,21 @@ function save() {
     localStorage.setItem("chosenHistory", JSON.stringify(chosenHistory));
 }
 
-/* ------------ WHEEL BUILD ------------ */
+/* ------------ INITIALS ------------ */
 const initials = name => name.split(" ").map(w => w[0]).join("").toUpperCase();
 
+/* ------------ WHEEL BUILD ------------ */
 function buildWheel(pool) {
     const wheel = document.getElementById("wheel");
     wheel.innerHTML = "";
     const angle = 360 / pool.length;
 
     for (let i = 0; i < pool.length; i++) {
-        const div = document.createElement("div");
-        div.className = "sliceLabel";
-        div.textContent = initials(pool[i]);
-        div.style.transform = `rotate(${i * angle}deg) translate(0,-50%)`;
-        wheel.appendChild(div);
+        const d = document.createElement("div");
+        d.className = "sliceLabel";
+        d.textContent = initials(pool[i]);
+        d.style.transform = `rotate(${angle * i}deg) translate(0, -50%)`;
+        wheel.appendChild(d);
     }
 }
 
@@ -233,16 +238,18 @@ function confetti() {
     }
 }
 
-/* ------------ SPIN (RIGHT POINTER VERSION) ------------ */
+/* ------------ SPIN (RIGHT-ALIGNED POINTER FIX) ------------ */
 let spinning = false;
 
 function spin(type) {
     if (spinning) return;
     spinning = true;
 
-    let pool = type === "safety" ? safetyPool : techPool;
-    if (pool.length === 0)
-        pool = type === "safety" ? (safetyPool=[...names]) : (techPool=[...names]);
+    let pool = (type === "safety") ? safetyPool : techPool;
+
+    if (pool.length === 0) {
+        pool = type === "safety" ? (safetyPool = [...names]) : (techPool = [...names]);
+    }
 
     buildWheel(pool);
 
@@ -251,13 +258,19 @@ function spin(type) {
     const index = Math.floor(Math.random() * pool.length);
     const winner = pool[index];
 
-    // RESET
+    /* RESET */
     wheel.style.transition = "none";
     wheel.style.transform = "rotate(0deg)";
     wheel.offsetHeight;
 
-    // RIGHT SIDE POINTER = 90° offset
-    let landingAngle = 360 * 10 + (90 - (index * sliceAngle + sliceAngle/2));
+    /* 
+       RIGHT-SIDE POINTER ALIGNMENT FIX:
+       Pointer is at 90°, so we subtract 90° from the slice center 
+       to align perfectly on the pointer.
+    */
+    let landingAngle = (index * sliceAngle + sliceAngle / 2) - 90;
+
+    // normalize 
     landingAngle = ((landingAngle % 360) + 360) + 360 * 10;
 
     wheel.style.transition = "transform 5s cubic-bezier(.17,.67,.12,1.02)";
@@ -265,6 +278,7 @@ function spin(type) {
 
     setTimeout(() => {
         spinning = false;
+
         pool.splice(index, 1);
         chosenHistory.unshift(winner);
         save();
@@ -307,6 +321,5 @@ buildWheel(names);
 updateLists();
 
 </script>
-
 </body>
 </html>
